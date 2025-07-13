@@ -11,65 +11,91 @@ import com.example.gistaparfume.data.Product
 import com.example.gistaparfume.data.config.AppDatabaseConfig
 import com.example.gistaparfume.data.repository.ProductRepository
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class ProductViewModel(app: Application): AndroidViewModel(app) {
+class ProductViewModel(app: Application) : AndroidViewModel(app) {
     private val repo = ProductRepository(
-        AppDatabaseConfig.getDatabase(app).productDao()
+        productDao = AppDatabaseConfig.getDatabase(app).productDao(),
+        categoryDao = AppDatabaseConfig.getDatabase(app).categoryDao(),
+        context = app.applicationContext // <-- Pass the context here
     )
 
-    // loading state
+    // STATE: The UI will observe these
+    private val _products = MutableStateFlow<List<Product>>(emptyList())
+    val products: StateFlow<List<Product>> = _products
+
     var isLoading by mutableStateOf(false)
         private set
 
-    // backing flow buat UI
-//    private val _products = MutableStateFlow<List<Product>>(emptyList())
-//    val products: StateFlow<List<Product>> = _products
+    // INTERNAL STATE: For managing queries and pagination
+    private var currentPage = 1
+    private var searchQuery = ""
+    private var selectedCategory = "All" // 'All' is our default
+    private var isLastPage = false
 
-    // REPLACE with this single line.
-    val products: StateFlow<List<Product>> = repo.getAllProducts()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000), // Start collecting when the UI is visible
-            initialValue = emptyList() // Start with an empty list
-        )
+    fun initialize() {
+        viewModelScope.launch {
+            // Step 1: Ensure the database is set up. This will wait until it's done.
+            repo.setupDatabaseIfNeeded()
 
+            // Step 2: Now that we know the data is ready, load the first page.
+            if (products.value.isEmpty()) {
+                loadNextPage()
+            }
+        }
+    }
 
-//    init {
-//        // load page pertama
-//        loadNextPage()
-//    }
-//
-//    /** Infinite scroll normal */
-//    fun loadNextPage() {
-//        if (isLoading) return
-//        isLoading = true
-//        viewModelScope.launch {
-//            val newItems = repo.loadNextPage()                 // pake repo.loadNextPage()
-//            Log.d("PRODUCT_VM", "Loaded ${newItems.size} new products from repository.")
-//
-//            _products.value = _products.value + newItems
-//            isLoading = false
-//        }
-//    }
+    fun loadNextPage() {
+        val logTag = "PRODUCT_VM_TRACE"
 
-    /** Reset search state & clear produk lama */
-//    fun resetSearch(keyword: String) {
-//        repo.resetSearch(keyword)                              // reset internal repo
-//        _products.value = emptyList()                          // clear UI list
-//    }
-//
-//    /** Infinite scroll hasil search by keyword */
-//    fun searchNextPage(keyword: String) {
-//        if (isLoading) return
-//        isLoading = true
-//        viewModelScope.launch {
-//            val newItems = repo.searchNextPage(keyword)        // ambil page selanjutnya berdasarkan keyword
-//            _products.value = _products.value + newItems
-//            isLoading = false
-//        }
-//    }
+        Log.d(logTag, "loadNextPage function called.")
+
+        // Prevent multiple simultaneous loads or loading beyond the last page
+        if (isLoading || isLastPage) {
+            Log.d(logTag, "Execution stopped: isLoading=$isLoading, isLastPage=$isLastPage")
+            return
+        }
+
+        viewModelScope.launch {
+            Log.d(logTag, "Coroutine launched. Setting isLoading to true.")
+            isLoading = true
+            try {
+                Log.d(logTag, "Calling repository to get page: $currentPage")
+                val newProducts = repo.getProductsPage(
+                    page = currentPage,
+                    query = searchQuery,
+                    category = selectedCategory
+                )
+                Log.d(logTag, "Repository returned ${newProducts.size} new products.")
+
+                if (newProducts.isNotEmpty()) {
+                    _products.value = _products.value + newProducts
+                    currentPage++
+                    Log.d(logTag, "Products appended. New total count: ${_products.value.size}")
+                } else {
+                    isLastPage = true
+                    Log.d(logTag, "No new products found. Marking as last page.")
+                }
+            } catch (e: Exception) {
+                // Handle errors
+                Log.e(logTag, "Error loading products", e)
+            } finally {
+                isLoading = false
+                Log.d(logTag, "Coroutine finished. Set isLoading to false.")
+            }
+        }
+    }
+
+    fun onFilterChanged(query: String = this.searchQuery, category: String = this.selectedCategory) {
+        // Reset everything when a filter changes
+        this.searchQuery = query
+        this.selectedCategory = category
+        this.currentPage = 1
+        this.isLastPage = false
+        _products.value = emptyList() // Clear the old list
+
+        // Load the first page with the new filters
+        loadNextPage()
+    }
 }

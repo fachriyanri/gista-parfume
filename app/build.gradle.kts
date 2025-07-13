@@ -58,7 +58,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material3.window.size.class1.android)
-
+    implementation(libs.androidx.datastore.preferences)
     // --- CORRECTED ROOM DEPENDENCIES ---
     // These now match the cleaned-up aliases in the TOML file.
     implementation(libs.androidx.room.runtime)

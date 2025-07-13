@@ -32,6 +32,25 @@ interface ProductDao {
   """)
     suspend fun searchWithCategory(keyword: String, limit: Int, offset: Int): List<ProductWithCategory>
 
+    @Transaction
+    @Query("""
+    SELECT p.id, p.slug, p.title, p.description, p.price, p.isAvailable, p.imageRes,
+           c.title AS categoryTitle
+    FROM product p
+    JOIN category c ON p.idCategory = c.id
+    WHERE 
+        (p.title LIKE :query OR p.description LIKE :query) 
+        AND
+        (:categoryTitle = 'All' OR c.title = :categoryTitle)
+    LIMIT :limit OFFSET :offset
+""")
+    suspend fun getProducts(
+        query: String,
+        categoryTitle: String,
+        limit: Int,
+        offset: Int
+    ): List<ProductWithCategory>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(products: List<ProductEntity>)
 }

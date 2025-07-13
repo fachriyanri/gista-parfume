@@ -31,6 +31,8 @@ import com.example.gistaparfume.ui.components.ModalSidebarContent
 @Composable
 fun HomeScreen(
     products: List<Product>,
+    isLoading: Boolean,
+    onLoadMore: () -> Unit,
     categories: List<String>,
     selectedCategory: String?,
     onAddToCart: (Product, Int) -> Unit,
@@ -65,6 +67,8 @@ fun HomeScreen(
                     // grid 2 kolom, fill sisa height
                     MainContent(
                         products = products,
+                        isLoading = isLoading,
+                        onLoadMore = onLoadMore,
                         onAddToCart = onAddToCart,
                         widthSizeClass = widthSizeClass,
                         modifier = Modifier
@@ -105,6 +109,8 @@ fun HomeScreen(
                     // grid 2 kolom, wrap height
                     MainContent(
                         products = products,
+                        isLoading = isLoading,
+                        onLoadMore = onLoadMore,
                         onAddToCart = onAddToCart,
                         widthSizeClass = widthSizeClass,
                         modifier = Modifier
@@ -150,6 +156,8 @@ fun HomeScreen(
                     // grid 1 kolom, fill sisa height
                     MainContent(
                         products = products,
+                        isLoading = isLoading,
+                        onLoadMore = onLoadMore,
                         onAddToCart = onAddToCart,
                         widthSizeClass = widthSizeClass,
                         modifier = Modifier

@@ -25,24 +25,26 @@ class MainActivity : ComponentActivity() {
                 val windowSizeClass = calculateWindowSizeClass(this)
                 val products by productViewModel.products.collectAsState()
                 val categories by categoryViewModel.categories.collectAsState()
-
-//                LaunchedEffect(Unit) {
-//                    // load page pertama produk & list kategori
-//                    productViewModel.loadNextPage()
-//                    categoryViewModel.loadCategories()
-//                }
-
+                val isLoading = productViewModel.isLoading
+                LaunchedEffect(Unit) {
+                    productViewModel.initialize()
+                }
                 HomeScreen(
                     products = products,
+                    isLoading = isLoading,
+                    onLoadMore = { productViewModel.loadNextPage() },
                     categories = categories.map { it.title },
-                    selectedCategory = categories.firstOrNull()?.title
-                        ?: "Semua Kategori",
+                    selectedCategory = categories.firstOrNull()?.title ?: "Semua Kategori",
                     onAddToCart = { product, qty ->
                         // implement kalau perlu
                     },
-                    onCategorySelected = {
+                    onCategorySelected = { category ->
+                        // When a category is picked, call onFilterChanged
+                        productViewModel.onFilterChanged(category = category)
                     },
-                    onSearch = {
+                    onSearch = { query ->
+                        // When user searches, call onFilterChanged
+                        productViewModel.onFilterChanged(query = query)
                     },
                     onSortByPrice = { asc ->
                         // bisa implement sort di VM
