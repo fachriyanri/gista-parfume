@@ -1,6 +1,7 @@
 package com.example.gistaparfume.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,24 +11,29 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -38,6 +44,8 @@ import com.example.gistaparfume.data.Product
 import java.text.NumberFormat
 import java.util.Locale
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductCard(
     product: Product,
@@ -105,7 +113,9 @@ fun ProductCard(
     }
 
     // 3. Pakai style.xxx di layout
-    var quantity by remember { mutableIntStateOf(1) }
+    var quantity by remember { mutableStateOf("1") }
+    val interactionSource = remember { MutableInteractionSource() }
+
 
     Card(
         modifier = Modifier
@@ -148,19 +158,47 @@ fun ProductCard(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                OutlinedTextField(
-                    value = quantity.toString(),
-                    onValueChange = { quantity = it.toIntOrNull()?.coerceAtLeast(1) ?: 1 },
+                BasicTextField(
+                    value = quantity,
+                    onValueChange = { newText ->
+                        if (newText.all { it.isDigit() }) {
+                            quantity = newText
+                        }
+                    },
                     modifier = Modifier
                         .width(style.qtyWidth)
-                        .height(style.fieldHeight),
+                        .height(style.addToCartHeight),
                     singleLine = true,
-                    label = { Text("Qty", fontSize = style.badgeFont) },
-                    textStyle = LocalTextStyle.current.copy(fontSize = style.badgeFont)
+                    textStyle = LocalTextStyle.current.copy(
+                        fontSize = style.badgeFont,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center
+                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    decorationBox = { innerTextField ->
+                        // The call to the decoration box is now complete
+                        OutlinedTextFieldDefaults.DecorationBox(
+                            value = quantity,
+                            innerTextField = innerTextField,
+                            enabled = true,
+                            singleLine = true,
+                            visualTransformation = VisualTransformation.None, // FIX: Use the default 'None'
+                            interactionSource = interactionSource, // FIX: Pass the created interactionSource
+                            label = { // <-- This is the new line
+                                Text("Qty", fontSize = style.badgeFont)
+                            },
+                            contentPadding = PaddingValues(vertical = 0.dp)
+                        )
+                    }
                 )
+
                 Spacer(Modifier.width(4.dp))
+
                 Button(
-                    onClick = { onAddToCart(product, quantity) },
+                    onClick = {
+                        val quantityInt = quantity.toIntOrNull()?.coerceAtLeast(1) ?: 1
+                        onAddToCart(product, quantityInt)
+                    },
                     modifier = Modifier
                         .height(style.addToCartHeight)
                         .width(style.addToCartWidth),

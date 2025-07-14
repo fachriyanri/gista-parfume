@@ -1,7 +1,9 @@
 package com.example.gistaparfume.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -40,7 +42,8 @@ fun MainContent(
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp) ,
+        contentPadding = PaddingValues(bottom = 100.dp)
     ) {
         items(products) { product ->
             ProductCard(
@@ -71,10 +74,11 @@ fun MainContent(
         snapshotFlow { gridState.layoutInfo.visibleItemsInfo }
             .collect { visibleItems ->
                 val lastVisibleItem = visibleItems.lastOrNull() ?: return@collect
+                Log.d("GRID_TRACE", "Visible last item: ${lastVisibleItem.index}, Total: ${gridState.layoutInfo.totalItemsCount}")
 
                 // This logic checks if the user has scrolled near the end of the list
                 // and if we are not currently loading new data.
-                val isNearEnd = lastVisibleItem.index >= products.size - 1
+                val isNearEnd = lastVisibleItem.index >= products.size - 3
                 if (isNearEnd && !isLoading) {
                     onLoadMore() // Trigger the function to load the next page
                 }

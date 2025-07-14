@@ -31,7 +31,7 @@ fun Footer(widthSizeClass: WindowWidthSizeClass = WindowWidthSizeClass.Compact) 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFFFF146D))
+            .background(Color(0xFF990000))
             .padding(16.dp)
     ) {
         if (isCompact) {
@@ -84,7 +84,7 @@ fun Footer(widthSizeClass: WindowWidthSizeClass = WindowWidthSizeClass.Compact) 
                         contentAlignment = Alignment.TopCenter
                     ) {
                         Image(
-                            painter = painterResource(id = R.drawable.bleau_de_channel),
+                            painter = painterResource(id = R.drawable.gista_logo),
                             contentDescription = "Logo Bawah",
                             modifier = Modifier.size(48.dp)
                         )

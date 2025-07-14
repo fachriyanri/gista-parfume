@@ -43,7 +43,7 @@ fun MainHeader() {
         }
 
         Image(
-            painter = painterResource(id = R.drawable.bleau_de_channel),
+            painter = painterResource(id = R.drawable.gista_logo),
             contentDescription = "Header Perfume",
             modifier = Modifier
                 .size(64.dp)

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
@@ -114,12 +113,11 @@ fun HomeScreen(
                         onAddToCart = onAddToCart,
                         widthSizeClass = widthSizeClass,
                         modifier = Modifier
-                            .fillMaxWidth(0.8f)
-                            .align(Alignment.CenterHorizontally)
-                            .wrapContentHeight()
+                            .weight(1f)
+                            .fillMaxWidth()
                     )
 
-                    Spacer(modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.height(86.dp))
                     Footer(widthSizeClass)
                 }
                 if (showSidebarMobile) {
@@ -164,6 +162,8 @@ fun HomeScreen(
                             .weight(1f)
                             .fillMaxWidth()
                     )
+
+                    Spacer(modifier = Modifier.height(86.dp))
 
                     Footer(widthSizeClass)
                 }
