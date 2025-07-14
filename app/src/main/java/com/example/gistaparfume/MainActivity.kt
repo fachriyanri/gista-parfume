@@ -26,6 +26,8 @@ class MainActivity : ComponentActivity() {
                 val products by productViewModel.products.collectAsState()
                 val categories by categoryViewModel.categories.collectAsState()
                 val isLoading = productViewModel.isLoading
+                val sortDescending = productViewModel.sortDescending // <-- Get the state
+
                 LaunchedEffect(Unit) {
                     productViewModel.initialize()
                 }
@@ -46,8 +48,9 @@ class MainActivity : ComponentActivity() {
                         // When user searches, call onFilterChanged
                         productViewModel.onFilterChanged(query = query)
                     },
-                    onSortByPrice = { asc ->
-                        // bisa implement sort di VM
+                    sortDescending = sortDescending,
+                    onSortByPrice = { isDescending  ->
+                        productViewModel.onSortChanged(isDescending)
                     },
                     widthSizeClass = windowSizeClass.widthSizeClass
                 )

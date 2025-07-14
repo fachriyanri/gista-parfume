@@ -152,11 +152,12 @@ class ProductRepository(
     suspend fun getProductsPage(
         page: Int,
         query: String,
-        category: String
+        category: String,
+        isSortDesc: Boolean?
     ): List<Product> {
         val offset = (page - 1) * pageSize
         val pattern = "%$query%" // Add wildcards for LIKE search
-        return productDao.getProducts(pattern, category, pageSize, offset)
+        return productDao.getProducts(pattern, category, pageSize, offset,isSortDesc = isSortDesc)
             .map { it.toProduct() }
     }
 

@@ -47,6 +47,7 @@ fun HomeScreenMobilePreview() {
         onCategorySelected = {},
         onSearch = {},
         onSortByPrice = {},
+        sortDescending = false,
         widthSizeClass = WindowWidthSizeClass.Compact
     )
 }
@@ -64,6 +65,7 @@ fun HomeScreenTabletPreview() {
         onCategorySelected = {},
         onSearch = {},
         onSortByPrice = {},
+        sortDescending = false,
         widthSizeClass = WindowWidthSizeClass.Expanded
     )
 }
@@ -81,6 +83,7 @@ fun HomeScreenMediumPreview() {
         onCategorySelected = {},
         onSearch = {},
         onSortByPrice = {},
+        sortDescending = false,
         widthSizeClass = WindowWidthSizeClass.Medium
     )
 }

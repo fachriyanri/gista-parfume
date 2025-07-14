@@ -42,13 +42,19 @@ interface ProductDao {
         (p.title LIKE :query OR p.description LIKE :query) 
         AND
         (:categoryTitle = 'All' OR c.title = :categoryTitle)
+    ORDER BY
+        /* This CASE statement handles the dynamic sorting */
+        CASE WHEN :isSortDesc = 1 THEN p.price END DESC, /* if true, sort by price descending */
+        CASE WHEN :isSortDesc = 0 THEN p.price END ASC  /* if false, sort by price ascending */
+        /* If isSortDesc is null, neither case matches, and no price sort is applied. */
     LIMIT :limit OFFSET :offset
 """)
     suspend fun getProducts(
         query: String,
         categoryTitle: String,
         limit: Int,
-        offset: Int
+        offset: Int,
+        isSortDesc: Boolean?
     ): List<ProductWithCategory>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

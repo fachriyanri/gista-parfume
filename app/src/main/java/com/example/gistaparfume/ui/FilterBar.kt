@@ -1,10 +1,10 @@
 package com.example.gistaparfume.ui
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -25,19 +25,25 @@ fun FilterBar(
     selectedCategory: String?,
     onSortByPrice: (Boolean) -> Unit,
     onFilterClick: () -> Unit,
-    widthSizeClass: WindowWidthSizeClass
+    widthSizeClass: WindowWidthSizeClass,
+    sortDescending: Boolean?
 ) {
     val isCompact = widthSizeClass == WindowWidthSizeClass.Compact
     val isWide = widthSizeClass == WindowWidthSizeClass.Expanded
 
+    // Determine which sort button is currently active.
+    val isTermurahActive = sortDescending == false
+    val isTermahalActive = sortDescending == true
+
     if (isCompact) {
+        // Layout for Compact screens (e.g., mobile portrait)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Baris 1: Kategori kiri & Filter kanan
+            // Row 1: Category and Filter button
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -51,50 +57,43 @@ fun FilterBar(
                 Button(
                     onClick = onFilterClick,
                     contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
-                    modifier = Modifier
-                        .defaultMinSize(minHeight = 23.dp)
-                        .height(23.dp)
+                    modifier = Modifier.height(23.dp)
                 ) {
                     Text("Filter & Kategori", fontSize = 11.sp)
                 }
             }
 
-            // Baris 2: Urutkan Harga
+            // Row 2: "Urutkan Harga" Label
             Text(
                 text = "Urutkan Harga:",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold
             )
 
-            // Baris 3: Tombol sort (termurah + termahal) sejajar
+            // Row 3: Sort buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start, // <= biar rata kiri
+                horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedButton(
+                // Use the refactored SortButton composable
+                SortButton(
+                    text = "Termurah",
+                    isActive = isTermurahActive,
                     onClick = { onSortByPrice(false) },
-                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                    modifier = Modifier
-                        .height(28.dp)
-                        .defaultMinSize(minHeight = 28.dp)
-                ) {
-                    Text("Termurah", fontSize = 11.sp)
-                }
+                    modifier = Modifier.height(28.dp)
+                )
                 Spacer(modifier = Modifier.width(8.dp))
-                OutlinedButton(
+                SortButton(
+                    text = "Termahal",
+                    isActive = isTermahalActive,
                     onClick = { onSortByPrice(true) },
-                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                    modifier = Modifier
-                        .height(28.dp)
-                        .defaultMinSize(minHeight = 28.dp)
-                ) {
-                    Text("Termahal", fontSize = 11.sp)
-                }
+                    modifier = Modifier.height(28.dp)
+                )
             }
         }
     } else {
-        // ✅ MEDIUM & TABLET (keep as is)
+        // Layout for Medium and Expanded screens (e.g., tablets, landscape phones)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -115,21 +114,23 @@ fun FilterBar(
                     fontWeight = FontWeight.SemiBold
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                OutlinedButton(
+
+                // Use the refactored SortButton composable
+                SortButton(
+                    text = "Termurah",
+                    isActive = isTermurahActive,
                     onClick = { onSortByPrice(false) },
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                    modifier = Modifier.height(32.dp)
-                ) {
-                    Text("Termurah", fontSize = 12.sp)
-                }
+                    modifier = Modifier.height(32.dp),
+                    fontSize = 12.sp
+                )
                 Spacer(modifier = Modifier.width(6.dp))
-                OutlinedButton(
+                SortButton(
+                    text = "Termahal",
+                    isActive = isTermahalActive,
                     onClick = { onSortByPrice(true) },
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                    modifier = Modifier.height(32.dp)
-                ) {
-                    Text("Termahal", fontSize = 12.sp)
-                }
+                    modifier = Modifier.height(32.dp),
+                    fontSize = 12.sp
+                )
 
                 if (!isWide) {
                     Spacer(modifier = Modifier.width(6.dp))
@@ -142,6 +143,38 @@ fun FilterBar(
                     }
                 }
             }
+        }
+    }
+}
+
+
+@Composable
+private fun SortButton(
+    text: String,
+    isActive: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    fontSize: androidx.compose.ui.unit.TextUnit = 11.sp
+) {
+    val contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+
+    if (isActive) {
+        // Show a filled Button when the sort is active
+        Button(
+            onClick = onClick,
+            modifier = modifier,
+            contentPadding = contentPadding
+        ) {
+            Text(text, fontSize = fontSize)
+        }
+    } else {
+        // Show an OutlinedButton when the sort is inactive
+        OutlinedButton(
+            onClick = onClick,
+            modifier = modifier,
+            contentPadding = contentPadding
+        ) {
+            Text(text, fontSize = fontSize)
         }
     }
 }

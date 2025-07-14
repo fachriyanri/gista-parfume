@@ -32,6 +32,7 @@ class ProductViewModel(app: Application) : AndroidViewModel(app) {
     private var currentPage = 1
     private var searchQuery = ""
     private var selectedCategory = "All" // 'All' is our default
+    var sortDescending: Boolean? = null
     private var isLastPage = false
 
     fun initialize() {
@@ -65,7 +66,8 @@ class ProductViewModel(app: Application) : AndroidViewModel(app) {
                 val newProducts = repo.getProductsPage(
                     page = currentPage,
                     query = searchQuery,
-                    category = selectedCategory
+                    category = selectedCategory,
+                    isSortDesc = sortDescending
                 )
                 Log.d(logTag, "Repository returned ${newProducts.size} new products.")
 
@@ -98,4 +100,19 @@ class ProductViewModel(app: Application) : AndroidViewModel(app) {
         // Load the first page with the new filters
         loadNextPage()
     }
+
+    fun onSortChanged(isDescending: Boolean) {
+        sortDescending = if (sortDescending == isDescending) {
+            null
+        } else {
+            isDescending
+        }
+
+        currentPage = 1
+        isLastPage = false
+        _products.value = emptyList()
+
+        loadNextPage()
+    }
+
 }
