@@ -48,6 +48,8 @@ fun HomeScreenMobilePreview() {
         onSearch = {},
         onSortByPrice = {},
         sortDescending = false,
+        onResetFilters = {},
+        isAnyFilterActive = false,
         widthSizeClass = WindowWidthSizeClass.Compact
     )
 }
@@ -66,6 +68,8 @@ fun HomeScreenTabletPreview() {
         onSearch = {},
         onSortByPrice = {},
         sortDescending = false,
+        onResetFilters = {},
+        isAnyFilterActive = false,
         widthSizeClass = WindowWidthSizeClass.Expanded
     )
 }
@@ -84,6 +88,8 @@ fun HomeScreenMediumPreview() {
         onSearch = {},
         onSortByPrice = {},
         sortDescending = false,
+        onResetFilters = {},
+        isAnyFilterActive = false,
         widthSizeClass = WindowWidthSizeClass.Medium
     )
 }

@@ -25,6 +25,8 @@ fun FilterBar(
     selectedCategory: String?,
     onSortByPrice: (Boolean) -> Unit,
     onFilterClick: () -> Unit,
+    onResetFilters: () -> Unit,
+    isAnyFilterActive: Boolean,
     widthSizeClass: WindowWidthSizeClass,
     sortDescending: Boolean?
 ) {
@@ -90,6 +92,14 @@ fun FilterBar(
                     onClick = { onSortByPrice(true) },
                     modifier = Modifier.height(28.dp)
                 )
+
+                Spacer(Modifier.weight(1f))
+                OptionalResetButton(
+                    isFilterActive = isAnyFilterActive,
+                    onReset = onResetFilters,
+                    buttonModifier = Modifier.height(28.dp),
+                    textFontSize = 11.sp
+                )
             }
         }
     } else {
@@ -132,8 +142,16 @@ fun FilterBar(
                     fontSize = 12.sp
                 )
 
+                Spacer(Modifier.weight(1f, fill = false))
+                OptionalResetButton(
+                    isFilterActive = isAnyFilterActive,
+                    onReset = onResetFilters,
+                    buttonModifier = Modifier.height(32.dp),
+                    textFontSize = 11.sp
+                )
+
                 if (!isWide) {
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = onFilterClick,
                         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
@@ -175,6 +193,27 @@ private fun SortButton(
             contentPadding = contentPadding
         ) {
             Text(text, fontSize = fontSize)
+        }
+    }
+}
+
+@Composable
+private fun OptionalResetButton(
+    isFilterActive: Boolean,
+    onReset: () -> Unit,
+    buttonModifier: Modifier = Modifier,
+    textFontSize: androidx.compose.ui.unit.TextUnit
+) {
+    val contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+
+    if (isFilterActive) {
+        Button(
+            onClick = onReset,
+            modifier = buttonModifier,
+            contentPadding = contentPadding
+            // No 'colors' parameter, so it uses the default theme color (blue)
+        ) {
+            Text("Reset", fontSize = textFontSize)
         }
     }
 }

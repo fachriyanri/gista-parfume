@@ -39,6 +39,8 @@ fun HomeScreen(
     onSearch: (String) -> Unit,
     onSortByPrice: (Boolean) -> Unit,
     sortDescending: Boolean?,
+    onResetFilters: () -> Unit, // <-- Add this
+    isAnyFilterActive: Boolean,
     widthSizeClass: WindowWidthSizeClass
 ) {
     var showSidebarMobile by remember { mutableStateOf(false) }
@@ -61,7 +63,9 @@ fun HomeScreen(
                         onSortByPrice = onSortByPrice,
                         onFilterClick = { showSidebarMobile = !showSidebarMobile },
                         widthSizeClass = widthSizeClass,
-                        sortDescending = sortDescending
+                        sortDescending = sortDescending,
+                        onResetFilters = onResetFilters,
+                        isAnyFilterActive = isAnyFilterActive,
                     )
                     Spacer(modifier = Modifier.height(46.dp))
 
@@ -104,7 +108,9 @@ fun HomeScreen(
                         onSortByPrice = onSortByPrice,
                         onFilterClick = { showSidebarMobile = !showSidebarMobile },
                         widthSizeClass = widthSizeClass,
-                        sortDescending = sortDescending
+                        sortDescending = sortDescending,
+                        onResetFilters = onResetFilters,
+                        isAnyFilterActive = isAnyFilterActive,
                     )
                     Spacer(modifier = Modifier.height(76.dp))
 
@@ -152,7 +158,9 @@ fun HomeScreen(
                         onSortByPrice = onSortByPrice,
                         onFilterClick = { showSidebarMobile = !showSidebarMobile },
                         widthSizeClass = widthSizeClass,
-                        sortDescending = sortDescending
+                        sortDescending = sortDescending,
+                        onResetFilters = onResetFilters,
+                        isAnyFilterActive = isAnyFilterActive,
                     )
 
                     // grid 1 kolom, fill sisa height

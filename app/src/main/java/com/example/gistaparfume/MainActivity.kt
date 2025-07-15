@@ -22,21 +22,25 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             GistaParfumeTheme {
+                val isAnyFilterActive by productViewModel.isAnyFilterActive.collectAsState() // <-- Collect new state
+                val selectedCategory by productViewModel.selectedCategory.collectAsState() // <-- Get selected category from VM
+
                 val windowSizeClass = calculateWindowSizeClass(this)
                 val products by productViewModel.products.collectAsState()
                 val categories by categoryViewModel.categories.collectAsState()
                 val isLoading = productViewModel.isLoading
-                val sortDescending = productViewModel.sortDescending // <-- Get the state
+                val sortDescending by productViewModel.sortDescending.collectAsState() // <-- THE FIX
 
                 LaunchedEffect(Unit) {
                     productViewModel.initialize()
+                    categoryViewModel.loadCategories()
                 }
                 HomeScreen(
                     products = products,
                     isLoading = isLoading,
                     onLoadMore = { productViewModel.loadNextPage() },
                     categories = categories.map { it.title },
-                    selectedCategory = categories.firstOrNull()?.title ?: "Semua Kategori",
+                    selectedCategory = selectedCategory,
                     onAddToCart = { product, qty ->
                         // implement kalau perlu
                     },
@@ -48,10 +52,12 @@ class MainActivity : ComponentActivity() {
                         // When user searches, call onFilterChanged
                         productViewModel.onFilterChanged(query = query)
                     },
-                    sortDescending = sortDescending,
                     onSortByPrice = { isDescending  ->
                         productViewModel.onSortChanged(isDescending)
                     },
+                    sortDescending = sortDescending,
+                    onResetFilters = { productViewModel.resetFilters() }, // <-- Pass the function
+                    isAnyFilterActive = isAnyFilterActive,
                     widthSizeClass = windowSizeClass.widthSizeClass
                 )
             }
