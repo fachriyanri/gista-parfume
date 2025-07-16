@@ -41,7 +41,8 @@ fun HomeScreen(
     sortDescending: Boolean?,
     onResetFilters: () -> Unit, // <-- Add this
     isAnyFilterActive: Boolean,
-    widthSizeClass: WindowWidthSizeClass
+    widthSizeClass: WindowWidthSizeClass,
+    onRegisterClick: () -> Unit = {}
 ) {
     var showSidebarMobile by remember { mutableStateOf(false) }
 
@@ -55,7 +56,7 @@ fun HomeScreen(
                         .fillMaxHeight()
                         .padding(end = 8.dp)
                 ) {
-                    TopHeader(widthSizeClass)
+                    TopHeader(widthSizeClass, onRegisterClick)
                     HorizontalDivider(color = Color.White, thickness = 7.dp)
                     MainHeader()
                     FilterBar(
@@ -100,7 +101,7 @@ fun HomeScreen(
             // ===== MEDIUM PHONE =====
             Box(modifier = Modifier.fillMaxSize()) {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    TopHeader(widthSizeClass)
+                    TopHeader(widthSizeClass, onRegisterClick)
                     HorizontalDivider(color = Color.White, thickness = 7.dp)
                     MainHeader()
                     FilterBar(
@@ -150,7 +151,7 @@ fun HomeScreen(
             // ===== COMPACT / MOBILE =====
             Box(modifier = Modifier.fillMaxSize()) {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    TopHeader(widthSizeClass)
+                    TopHeader(widthSizeClass, onRegisterClick)
                     HorizontalDivider(color = Color.White, thickness = 7.dp)
                     MainHeader()
                     FilterBar(

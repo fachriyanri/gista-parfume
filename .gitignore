@@ -51,3 +51,5 @@ local.properties
 
 # === Gradle wrapper binary ===
 gradle/wrapper/gradle-wrapper.jar
+/app/.kiro
+/app/.vscode

@@ -21,7 +21,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun TopHeader(widthSizeClass: WindowWidthSizeClass) {
+fun TopHeader(
+    widthSizeClass: WindowWidthSizeClass,
+    onRegisterClick: () -> Unit = {},
+    onHomeClick: () -> Unit = {}
+) {
     val isCompact = widthSizeClass == WindowWidthSizeClass.Compact
 
     if (isCompact) {
@@ -40,7 +44,7 @@ fun TopHeader(widthSizeClass: WindowWidthSizeClass) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                NavButtons()
+                NavButtons(onRegisterClick = onRegisterClick, onHomeClick = onHomeClick)
             }
         }
     } else {
@@ -54,7 +58,7 @@ fun TopHeader(widthSizeClass: WindowWidthSizeClass) {
         ) {
             TitleText()
             Row(verticalAlignment = Alignment.CenterVertically) {
-                NavButtons()
+                NavButtons(onRegisterClick = onRegisterClick, onHomeClick = onHomeClick)
             }
         }
     }
@@ -71,8 +75,8 @@ fun TitleText(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun NavButtons() {
-    TextButton(onClick = {}) { Text("Home", color = Color.White, fontSize = 12.sp) }
+fun NavButtons(onRegisterClick: () -> Unit = {}, onHomeClick: () -> Unit = {}) {
+    TextButton(onClick = onHomeClick) { Text("Home", color = Color.White, fontSize = 12.sp) }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = {}) {
@@ -82,7 +86,7 @@ fun NavButtons() {
     }
 
     TextButton(onClick = {}) { Text("Login", color = Color.White, fontSize = 12.sp) }
-    TextButton(onClick = {}) { Text("Register", color = Color.White, fontSize = 12.sp) }
+    TextButton(onClick = onRegisterClick) { Text("Register", color = Color.White, fontSize = 12.sp) }
 }
 
 

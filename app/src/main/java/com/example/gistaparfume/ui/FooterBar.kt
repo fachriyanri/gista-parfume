@@ -2,6 +2,7 @@ package com.example.gistaparfume.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,7 +26,7 @@ import androidx.compose.ui.unit.sp
 import com.example.gistaparfume.R
 
 @Composable
-fun Footer(widthSizeClass: WindowWidthSizeClass = WindowWidthSizeClass.Compact) {
+fun Footer(widthSizeClass: WindowWidthSizeClass = WindowWidthSizeClass.Compact, onHomeClick: () -> Unit = {}) {
     val isCompact = widthSizeClass == WindowWidthSizeClass.Compact
 
     Column(
@@ -72,7 +73,12 @@ fun Footer(widthSizeClass: WindowWidthSizeClass = WindowWidthSizeClass.Compact) 
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Text("Akses Cepat", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = Color.Black)
-                        Text("Home", fontSize = 11.sp, color = Color.Black)
+                        Text(
+                            "Home", 
+                            fontSize = 11.sp, 
+                            color = Color.Black,
+                            modifier = Modifier.clickable { onHomeClick() }
+                        )
                         Text("Keranjang", fontSize = 11.sp, color = Color.Black)
                         Text("Status Order", fontSize = 11.sp, color = Color.Black)
                     }
@@ -136,7 +142,11 @@ fun Footer(widthSizeClass: WindowWidthSizeClass = WindowWidthSizeClass.Compact) 
                 }
                 Column {
                     Text("Akses Cepat", fontWeight = FontWeight.Bold, color = Color.Black)
-                    Text("Home", color = Color.Black)
+                    Text(
+                        "Home", 
+                        color = Color.Black,
+                        modifier = Modifier.clickable { onHomeClick() }
+                    )
                     Text("Keranjang", color = Color.Black)
                     Text("Status Order", color = Color.Black)
                 }

@@ -39,9 +39,6 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14" // versi compiler extension Compose terbaru
-    }
 }
 
 dependencies {
@@ -50,7 +47,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.activity.compose)
 
-    // Compose BOM untuk versi konsisten
+    // Compose BOM for consistent versions
     implementation(platform(libs.androidx.compose.bom))
 
     implementation(libs.androidx.ui)
@@ -59,20 +56,30 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material3.window.size.class1.android)
     implementation(libs.androidx.datastore.preferences)
-    // --- CORRECTED ROOM DEPENDENCIES ---
-    // These now match the cleaned-up aliases in the TOML file.
+
+    // Navigation Compose - Now using version catalog
+    implementation(libs.androidx.navigation.compose)
+
+    // Room dependencies
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
-
-
+    // Debug dependencies
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    // Test dependencies - Now using version catalog
     testImplementation(libs.junit)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.inline)
+    testImplementation(libs.androidx.arch.core.testing)
+    testImplementation(libs.kotlinx.coroutines.test)
+
+    // Android Test dependencies
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
 }
+
