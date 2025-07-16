@@ -41,8 +41,9 @@ class MainActivity : ComponentActivity() {
                 val sortDescending by productViewModel.sortDescending.collectAsState()
 
                 LaunchedEffect(Unit) {
-                    productViewModel.initialize()
+                    productViewModel.setupDatabase()
                     categoryViewModel.loadCategories()
+                    productViewModel.initialize()
                 }
 
                 NavHost(

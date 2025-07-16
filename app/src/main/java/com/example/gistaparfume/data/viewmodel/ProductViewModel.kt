@@ -56,10 +56,12 @@ class ProductViewModel(app: Application) : AndroidViewModel(app) {
     private var currentPage = 1
     private var isLastPage = false
 
+    suspend fun setupDatabase() {
+        repo.setupDatabaseIfNeeded()
+    }
 
     fun initialize() {
         viewModelScope.launch {
-            repo.setupDatabaseIfNeeded()
             if (products.value.isEmpty()) {
                 loadNextPage()
             }
