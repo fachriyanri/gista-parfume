@@ -53,3 +53,4 @@ local.properties
 gradle/wrapper/gradle-wrapper.jar
 /app/.kiro
 /app/.vscode
+/app/src/main/java/com/example/gistaparfume/docs

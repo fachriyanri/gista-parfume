@@ -42,7 +42,11 @@ fun HomeScreen(
     onResetFilters: () -> Unit, // <-- Add this
     isAnyFilterActive: Boolean,
     widthSizeClass: WindowWidthSizeClass,
-    onRegisterClick: () -> Unit = {}
+    onRegisterClick: () -> Unit = {},
+    onLoginClick: () -> Unit = {},
+    currentUser: com.example.gistaparfume.data.entity.UserEntity? = null,
+    isLoggedIn: Boolean = false,
+    onLogout: () -> Unit = {}
 ) {
     var showSidebarMobile by remember { mutableStateOf(false) }
 
@@ -56,7 +60,14 @@ fun HomeScreen(
                         .fillMaxHeight()
                         .padding(end = 8.dp)
                 ) {
-                    TopHeader(widthSizeClass, onRegisterClick)
+                    TopHeader(
+                        widthSizeClass = widthSizeClass,
+                        onRegisterClick = onRegisterClick,
+                        onLoginClick = onLoginClick,
+                        currentUser = currentUser,
+                        isLoggedIn = isLoggedIn,
+                        onLogout = onLogout
+                    )
                     HorizontalDivider(color = Color.White, thickness = 7.dp)
                     MainHeader()
                     FilterBar(
@@ -101,7 +112,14 @@ fun HomeScreen(
             // ===== MEDIUM PHONE =====
             Box(modifier = Modifier.fillMaxSize()) {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    TopHeader(widthSizeClass, onRegisterClick)
+                    TopHeader(
+                        widthSizeClass = widthSizeClass,
+                        onRegisterClick = onRegisterClick,
+                        onLoginClick = onLoginClick,
+                        currentUser = currentUser,
+                        isLoggedIn = isLoggedIn,
+                        onLogout = onLogout
+                    )
                     HorizontalDivider(color = Color.White, thickness = 7.dp)
                     MainHeader()
                     FilterBar(
@@ -151,7 +169,14 @@ fun HomeScreen(
             // ===== COMPACT / MOBILE =====
             Box(modifier = Modifier.fillMaxSize()) {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    TopHeader(widthSizeClass, onRegisterClick)
+                    TopHeader(
+                        widthSizeClass = widthSizeClass,
+                        onRegisterClick = onRegisterClick,
+                        onLoginClick = onLoginClick,
+                        currentUser = currentUser,
+                        isLoggedIn = isLoggedIn,
+                        onLogout = onLogout
+                    )
                     HorizontalDivider(color = Color.White, thickness = 7.dp)
                     MainHeader()
                     FilterBar(

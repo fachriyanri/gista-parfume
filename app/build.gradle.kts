@@ -39,6 +39,14 @@ android {
     buildFeatures {
         compose = true
     }
+    
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/NOTICE.md"
+            excludes += "/META-INF/LICENSE.md"
+        }
+    }
 }
 
 dependencies {
@@ -64,6 +72,13 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+
+    // Password encryption - Android compatible BCrypt
+    implementation("at.favre.lib:bcrypt:0.10.2")
+
+    // JavaMail API for email functionality
+    implementation("com.sun.mail:android-mail:1.6.7")
+    implementation("com.sun.mail:android-activation:1.6.7")
 
     // Debug dependencies
     debugImplementation(libs.androidx.ui.tooling)

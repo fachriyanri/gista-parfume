@@ -13,10 +13,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.gistaparfume.data.viewmodel.CategoryViewModel
+import com.example.gistaparfume.data.viewmodel.LoginViewModel
 import com.example.gistaparfume.data.viewmodel.ProductViewModel
 import com.example.gistaparfume.data.viewmodel.RegisterViewModel
+import com.example.gistaparfume.ui.ForgotPasswordScreen
 import com.example.gistaparfume.ui.HomeScreen
+import com.example.gistaparfume.ui.LoginScreen
 import com.example.gistaparfume.ui.RegisterScreen
+import com.example.gistaparfume.ui.ResetPasswordScreen
 import com.example.gistaparfume.ui.theme.GistaParfumeTheme
 import com.example.gistaparfume.utils.CustomToast
 
@@ -24,6 +28,7 @@ class MainActivity : ComponentActivity() {
     private val productViewModel: ProductViewModel by viewModels()
     private val categoryViewModel: CategoryViewModel by viewModels()
     private val registerViewModel: RegisterViewModel by viewModels()
+    private val loginViewModel: LoginViewModel by viewModels()
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,11 +44,27 @@ class MainActivity : ComponentActivity() {
                 val categories by categoryViewModel.categories.collectAsState()
                 val isLoading = productViewModel.isLoading
                 val sortDescending by productViewModel.sortDescending.collectAsState()
+                
+                // Authentication state
+                val loginUiState by loginViewModel.uiState.collectAsState()
 
                 LaunchedEffect(Unit) {
                     productViewModel.setupDatabase()
                     categoryViewModel.loadCategories()
                     productViewModel.initialize()
+                    
+                    // Check authentication state on app startup
+                    loginViewModel.checkAuthenticationState()
+                }
+                
+                // Handle navigation based on authentication state changes
+                LaunchedEffect(loginUiState.isLoggedIn) {
+                    // When user successfully logs in, navigate to home if currently on login screen
+                    if (loginUiState.isLoggedIn && navController.currentDestination?.route == "login") {
+                        navController.navigate("home", NavOptions.Builder()
+                            .setPopUpTo("home", inclusive = false)
+                            .build())
+                    }
                 }
 
                 NavHost(
@@ -77,6 +98,80 @@ class MainActivity : ComponentActivity() {
                             widthSizeClass = windowSizeClass.widthSizeClass,
                             onRegisterClick = {
                                 navController.navigate("register")
+                            },
+                            onLoginClick = {
+                                navController.navigate("login")
+                            },
+                            // Pass authentication state to HomeScreen
+                            currentUser = loginUiState.currentUser,
+                            isLoggedIn = loginUiState.isLoggedIn,
+                            onLogout = {
+                                loginViewModel.logout()
+                            }
+                        )
+                    }
+                    
+                    composable("login") {
+                        LoginScreen(
+                            widthSizeClass = windowSizeClass.widthSizeClass,
+                            viewModel = loginViewModel,
+                            onNavigateToHome = {
+                                navController.navigate("home", NavOptions.Builder()
+                                    .setPopUpTo("home", inclusive = false)
+                                    .build())
+                            },
+                            onNavigateToRegister = {
+                                navController.navigate("register")
+                            },
+                            onNavigateToForgotPassword = {
+                                navController.navigate("forgot_password")
+                            },
+                            onNavigateToHomeFromHeader = {
+                                navController.navigate("home")
+                            }
+                        )
+                    }
+                    
+                    composable("forgot_password") {
+                        ForgotPasswordScreen(
+                            widthSizeClass = windowSizeClass.widthSizeClass,
+                            viewModel = loginViewModel,
+                            onNavigateToLogin = {
+                                navController.navigate("login")
+                            },
+                            onNavigateToHomeFromHeader = {
+                                navController.navigate("home")
+                            },
+                            onNavigateToResetPassword = { email ->
+                                navController.navigate("reset_password/$email")
+                            },
+                            onNavigateToRegister = {
+                                navController.navigate("register")
+                            }
+                        )
+                    }
+                    
+                    composable("reset_password/{email}") { backStackEntry ->
+                        val email = backStackEntry.arguments?.getString("email") ?: ""
+                        ResetPasswordScreen(
+                            widthSizeClass = windowSizeClass.widthSizeClass,
+                            viewModel = loginViewModel,
+                            email = email,
+                            onNavigateToLogin = {
+                                navController.navigate("login", NavOptions.Builder()
+                                    .setPopUpTo("login", inclusive = false)
+                                    .build())
+                            },
+                            onNavigateToHomeFromHeader = {
+                                navController.navigate("home")
+                            },
+                            onNavigateToHome = {
+                                navController.navigate("home", NavOptions.Builder()
+                                    .setPopUpTo("home", inclusive = false)
+                                    .build())
+                            },
+                            onNavigateToRegister = {
+                                navController.navigate("register")
                             }
                         )
                     }
@@ -97,6 +192,9 @@ class MainActivity : ComponentActivity() {
                             onNavigateToHomeFromHeader = {
                                 // Navigate to home when Home button is clicked in header
                                 navController.navigate("home")
+                            },
+                            onNavigateToLogin = {
+                                navController.navigate("login")
                             }
                         )
                     }

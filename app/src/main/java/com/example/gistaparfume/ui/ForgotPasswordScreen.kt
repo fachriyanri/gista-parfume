@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -24,7 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,31 +33,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.gistaparfume.data.viewmodel.RegisterViewModel
+import com.example.gistaparfume.data.viewmodel.LoginViewModel
 
 @Composable
-fun RegisterScreen(
+fun ForgotPasswordScreen(
     widthSizeClass: WindowWidthSizeClass,
-    viewModel: RegisterViewModel,
-    onNavigateToHome: () -> Unit = {},
-    onShowToast: (String) -> Unit = {},
+    viewModel: LoginViewModel,
+    onNavigateToLogin: () -> Unit = {},
     onNavigateToHomeFromHeader: () -> Unit = {},
-    onNavigateToLogin: () -> Unit = {}
+    onNavigateToResetPassword: (String) -> Unit = {},
+    onNavigateToRegister: () -> Unit = {}
 ) {
-    // Set callbacks in viewModel
-    LaunchedEffect(Unit) {
-        viewModel.setNavigationCallback(onNavigateToHome)
-        viewModel.setToastCallback(onShowToast)
-    }
-    
-    // Handle registration success - removed immediate handling to allow dialog to show
-    
-    // Handle success and error dialogs
-    RegistrationDialogs(viewModel = viewModel)
+    val uiState by viewModel.uiState.collectAsState()
     
     when (widthSizeClass) {
         WindowWidthSizeClass.Expanded -> {
@@ -71,9 +60,9 @@ fun RegisterScreen(
                 ) {
                     TopHeader(
                         widthSizeClass = widthSizeClass,
-                        onRegisterClick = {},
                         onHomeClick = onNavigateToHomeFromHeader,
-                        onLoginClick = onNavigateToLogin
+                        onLoginClick = onNavigateToLogin,
+                        onRegisterClick = onNavigateToRegister
                     )
                     HorizontalDivider(color = Color.White, thickness = 7.dp)
                     
@@ -84,8 +73,11 @@ fun RegisterScreen(
                             .fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        RegisterForm(
+                        ForgotPasswordForm(
                             viewModel = viewModel,
+                            uiState = uiState,
+                            onNavigateToLogin = onNavigateToLogin,
+                            onNavigateToResetPassword = onNavigateToResetPassword,
                             modifier = Modifier
                                 .widthIn(max = 600.dp)
                                 .padding(horizontal = 32.dp, vertical = 24.dp)
@@ -101,15 +93,18 @@ fun RegisterScreen(
             Column(modifier = Modifier.fillMaxSize()) {
                 TopHeader(
                     widthSizeClass = widthSizeClass,
-                    onRegisterClick = {},
                     onHomeClick = onNavigateToHomeFromHeader,
-                    onLoginClick = onNavigateToLogin
+                    onLoginClick = onNavigateToLogin,
+                    onRegisterClick = onNavigateToRegister
                 )
                 HorizontalDivider(color = Color.White, thickness = 7.dp)
                 
                 // Form with optimized spacing
-                RegisterForm(
+                ForgotPasswordForm(
                     viewModel = viewModel,
+                    uiState = uiState,
+                    onNavigateToLogin = onNavigateToLogin,
+                    onNavigateToResetPassword = onNavigateToResetPassword,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
@@ -124,15 +119,18 @@ fun RegisterScreen(
             Column(modifier = Modifier.fillMaxSize()) {
                 TopHeader(
                     widthSizeClass = widthSizeClass,
-                    onRegisterClick = {},
                     onHomeClick = onNavigateToHomeFromHeader,
-                    onLoginClick = onNavigateToLogin
+                    onLoginClick = onNavigateToLogin,
+                    onRegisterClick = onNavigateToRegister
                 )
                 HorizontalDivider(color = Color.White, thickness = 7.dp)
                 
                 // Form with mobile spacing
-                RegisterForm(
+                ForgotPasswordForm(
                     viewModel = viewModel,
+                    uiState = uiState,
+                    onNavigateToLogin = onNavigateToLogin,
+                    onNavigateToResetPassword = onNavigateToResetPassword,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
@@ -146,10 +144,21 @@ fun RegisterScreen(
 }
 
 @Composable
-private fun RegisterForm(
-    viewModel: RegisterViewModel,
+private fun ForgotPasswordForm(
+    viewModel: LoginViewModel,
+    uiState: com.example.gistaparfume.data.LoginUiState,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToResetPassword: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    // Store the email locally to use for navigation after it's cleared from viewModel
+    var lastSentEmail by remember { mutableStateOf("") }
+    
+    // Update lastSentEmail when reset email changes and is not empty
+    if (viewModel.resetEmail.isNotEmpty()) {
+        lastSentEmail = viewModel.resetEmail
+    }
+    
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -157,71 +166,63 @@ private fun RegisterForm(
     ) {
         // Form Title
         Text(
-            text = "Formulir Registrasi",
+            text = "Formulir Lupa Password",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(bottom = 8.dp)
         )
         
-        // Name Input Field
-        NameInputField(
-            value = viewModel.formState.name,
-            onValueChange = viewModel::updateName,
-            modifier = Modifier.fillMaxWidth()
-        )
+        // Show success message if password reset email was sent
+        if (uiState.isPasswordResetSent) {
+            SuccessMessageDisplay(
+                message = "Email reset password telah dikirim. Silakan periksa kotak masuk Anda.",
+                onDismiss = viewModel::resetPasswordResetSentState,
+                onContinue = { onNavigateToResetPassword(lastSentEmail) },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
         
-        // Email Input Field with validation
-        EmailInputField(
-            value = viewModel.formState.email,
-            onValueChange = viewModel::updateEmail,
-            isError = viewModel.formState.emailError != null,
-            errorMessage = viewModel.formState.emailError,
-            modifier = Modifier.fillMaxWidth()
-        )
-        
-        // Password Input Field with validation
-        PasswordInputField(
-            value = viewModel.formState.password,
-            onValueChange = viewModel::updatePassword,
-            isError = viewModel.formState.passwordError != null,
-            errorMessage = viewModel.formState.passwordError,
-            placeholder = "Masukan password minimal 8 character",
-            modifier = Modifier.fillMaxWidth()
-        )
-        
-        // Confirm Password Input Field with validation
-        PasswordInputField(
-            value = viewModel.formState.confirmPassword,
-            onValueChange = viewModel::updateConfirmPassword,
-            isError = viewModel.formState.confirmPasswordError != null,
-            errorMessage = viewModel.formState.confirmPasswordError,
-            placeholder = "Masukan password yang sama",
-            label = "Konfirmasi Password",
+        // Email Input Field
+        ResetEmailInputField(
+            value = viewModel.resetEmail,
+            onValueChange = viewModel::updateResetEmail,
             modifier = Modifier.fillMaxWidth()
         )
         
         // Error message display
-        ErrorMessageDisplay(
-            errorMessage = viewModel.errorMessage,
-            onDismiss = viewModel::clearError,
+        PasswordResetErrorMessageDisplay(
+            errorMessage = uiState.passwordResetErrorMessage,
+            onDismiss = viewModel::clearPasswordResetError,
             modifier = Modifier.fillMaxWidth()
         )
         
-        // Sign Up Button
-        SignUpButton(
-            isEnabled = viewModel.formState.isFormValid,
-            isLoading = viewModel.isLoading,
-            onClick = viewModel::submitRegistration,
+        // Reset Password Button
+        ResetPasswordButton(
+            isEnabled = viewModel.resetEmail.isNotEmpty(),
+            isLoading = uiState.isPasswordResetLoading,
+            onClick = { viewModel.resetPassword() },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp)
         )
+        
+        // Back to Login Link
+        TextButton(
+            onClick = onNavigateToLogin,
+            modifier = Modifier.padding(top = 16.dp)
+        ) {
+            Text(
+                text = "back to login",
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 14.sp
+            )
+        }
     }
 }
 
 @Composable
-private fun NameInputField(
+private fun ResetEmailInputField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -229,81 +230,16 @@ private fun NameInputField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text("Nama") },
+        label = { Text("E-mail") },
+        placeholder = { Text("Masukan alamat email") },
         singleLine = true,
-        modifier = modifier,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+        modifier = modifier
     )
 }
 
 @Composable
-private fun EmailInputField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    isError: Boolean,
-    errorMessage: String?,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier) {
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            label = { Text("E-mail") },
-            singleLine = true,
-            isError = isError,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            modifier = Modifier.fillMaxWidth()
-        )
-        
-        // Error message display
-        if (errorMessage != null) {
-            Text(
-                text = errorMessage,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-            )
-        }
-    }
-}
-
-@Composable
-private fun PasswordInputField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    isError: Boolean,
-    errorMessage: String?,
-    placeholder: String,
-    label: String = "Password",
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier) {
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            label = { Text(label) },
-            placeholder = { Text(placeholder) },
-            singleLine = true,
-            isError = isError,
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier.fillMaxWidth()
-        )
-        
-        // Error message display
-        if (errorMessage != null) {
-            Text(
-                text = errorMessage,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-            )
-        }
-    }
-}
-
-@Composable
-private fun SignUpButton(
+private fun ResetPasswordButton(
     isEnabled: Boolean,
     isLoading: Boolean,
     onClick: () -> Unit,
@@ -325,14 +261,14 @@ private fun SignUpButton(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
                 Text(
-                    text = "Mendaftar...",
+                    text = "Mengirim...",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium
                 )
             }
         } else {
             Text(
-                text = "Sign Up",
+                text = "Reset Password",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium
             )
@@ -340,83 +276,10 @@ private fun SignUpButton(
     }
 }
 
-@Composable
-private fun RegistrationDialogs(viewModel: RegisterViewModel) {
-    // Success Dialog
-    if (viewModel.isRegistrationSuccess) {
-        SuccessDialog(
-            viewModel = viewModel,
-            onDismiss = {
-                viewModel.resetRegistrationSuccess()
-            }
-        )
-    }
-}
+
 
 @Composable
-private fun SuccessDialog(
-    viewModel: RegisterViewModel,
-    onDismiss: () -> Unit
-) {
-    var hasHandledSuccess by remember { mutableStateOf(false) }
-    
-    // Auto-dismiss after 5 seconds and handle success actions
-    LaunchedEffect(Unit) {
-        kotlinx.coroutines.delay(5000L) // 5 seconds delay
-        if (!hasHandledSuccess) {
-            hasHandledSuccess = true
-            viewModel.handleRegistrationSuccess() // Handle toast and navigation after delay
-            onDismiss()
-        }
-    }
-    
-    AlertDialog(
-        onDismissRequest = {
-            // If user manually dismisses, still handle success actions
-            if (!hasHandledSuccess) {
-                hasHandledSuccess = true
-                viewModel.handleRegistrationSuccess()
-            }
-            onDismiss()
-        },
-        title = {
-            Text(
-                text = "Registrasi Berhasil!",
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-        },
-        text = {
-            Text(
-                text = "Akun Anda telah berhasil dibuat. Selamat datang di aplikasi kami!",
-                style = MaterialTheme.typography.bodyMedium
-            )
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    // Handle success actions when OK is clicked
-                    if (!hasHandledSuccess) {
-                        hasHandledSuccess = true
-                        viewModel.handleRegistrationSuccess()
-                    }
-                    onDismiss()
-                }
-            ) {
-                Text(
-                    text = "OK",
-                    fontWeight = FontWeight.Medium
-                )
-            }
-        },
-        containerColor = MaterialTheme.colorScheme.surface,
-        titleContentColor = MaterialTheme.colorScheme.onSurface,
-        textContentColor = MaterialTheme.colorScheme.onSurface
-    )
-}
-
-@Composable
-private fun ErrorMessageDisplay(
+private fun PasswordResetErrorMessageDisplay(
     errorMessage: String?,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
@@ -449,6 +312,59 @@ private fun ErrorMessageDisplay(
                     Text(
                         text = "Tutup",
                         color = MaterialTheme.colorScheme.onErrorContainer,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SuccessMessageDisplay(
+    message: String,
+    onDismiss: () -> Unit,
+    onContinue: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.padding(vertical = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFE8F5E8) // Light green background
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = message,
+                color = Color(0xFF2E7D32), // Dark green text
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
+            ) {
+                TextButton(
+                    onClick = onDismiss
+                ) {
+                    Text(
+                        text = "Tutup",
+                        color = Color(0xFF2E7D32), // Dark green text
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+                
+                Button(
+                    onClick = onContinue
+                ) {
+                    Text(
+                        text = "Lanjutkan",
                         fontWeight = FontWeight.Medium
                     )
                 }

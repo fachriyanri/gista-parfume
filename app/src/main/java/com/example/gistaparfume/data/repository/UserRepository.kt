@@ -5,13 +5,13 @@ import com.example.gistaparfume.data.config.AppDatabaseConfig
 import com.example.gistaparfume.data.dao.UserDao
 import com.example.gistaparfume.data.entity.UserEntity
 import com.example.gistaparfume.data.entity.UserRole
+import com.example.gistaparfume.utils.PasswordUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.security.MessageDigest
 
 class UserRepository(
     private val userDao: UserDao,
-    private val context: Context
+    private val applicationContext: Context // Use applicationContext to avoid memory leaks
 ) {
     
     /**
@@ -60,7 +60,7 @@ class UserRepository(
                 
                 // Encrypt password
                 val encryptedPassword = try {
-                    encryptPassword(password)
+                    PasswordUtils.encryptPassword(password)
                 } catch (e: Exception) {
                     return@withContext Result.failure(EncryptionException("Terjadi kesalahan saat mengenkripsi password"))
                 }
@@ -144,17 +144,7 @@ class UserRepository(
         val emailPattern = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
         return email.matches(emailPattern.toRegex())
     }
-    
-    /**
-     * Encrypts password using SHA-256 hashing
-     * @param password Plain text password
-     * @return String - Encrypted password
-     */
-    private fun encryptPassword(password: String): String {
-        val digest = MessageDigest.getInstance("SHA-256")
-        val hashBytes = digest.digest(password.toByteArray())
-        return hashBytes.joinToString("") { "%02x".format(it) }
-    }
+
     
     companion object {
         @Volatile
@@ -162,8 +152,10 @@ class UserRepository(
         
         fun getInstance(context: Context): UserRepository {
             return INSTANCE ?: synchronized(this) {
-                val database = AppDatabaseConfig.getDatabase(context)
-                val instance = UserRepository(database.userDao(), context)
+                // Use applicationContext to avoid memory leaks
+                val applicationContext = context.applicationContext
+                val database = AppDatabaseConfig.getDatabase(applicationContext)
+                val instance = UserRepository(database.userDao(), applicationContext)
                 INSTANCE = instance
                 instance
             }

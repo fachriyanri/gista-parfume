@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -24,11 +23,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,27 +34,23 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.gistaparfume.data.viewmodel.RegisterViewModel
+import com.example.gistaparfume.data.viewmodel.LoginViewModel
 
 @Composable
-fun RegisterScreen(
+fun LoginScreen(
     widthSizeClass: WindowWidthSizeClass,
-    viewModel: RegisterViewModel,
+    viewModel: LoginViewModel,
     onNavigateToHome: () -> Unit = {},
-    onShowToast: (String) -> Unit = {},
-    onNavigateToHomeFromHeader: () -> Unit = {},
-    onNavigateToLogin: () -> Unit = {}
+    onNavigateToRegister: () -> Unit = {},
+    onNavigateToForgotPassword: () -> Unit = {},
+    onNavigateToHomeFromHeader: () -> Unit = {}
 ) {
-    // Set callbacks in viewModel
-    LaunchedEffect(Unit) {
-        viewModel.setNavigationCallback(onNavigateToHome)
-        viewModel.setToastCallback(onShowToast)
+    val uiState by viewModel.uiState.collectAsState()
+    
+    // Handle successful login navigation
+    if (uiState.isLoggedIn) {
+        onNavigateToHome()
     }
-    
-    // Handle registration success - removed immediate handling to allow dialog to show
-    
-    // Handle success and error dialogs
-    RegistrationDialogs(viewModel = viewModel)
     
     when (widthSizeClass) {
         WindowWidthSizeClass.Expanded -> {
@@ -71,9 +63,9 @@ fun RegisterScreen(
                 ) {
                     TopHeader(
                         widthSizeClass = widthSizeClass,
-                        onRegisterClick = {},
+                        onRegisterClick = onNavigateToRegister,
                         onHomeClick = onNavigateToHomeFromHeader,
-                        onLoginClick = onNavigateToLogin
+                        onLoginClick = {}
                     )
                     HorizontalDivider(color = Color.White, thickness = 7.dp)
                     
@@ -84,8 +76,11 @@ fun RegisterScreen(
                             .fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        RegisterForm(
+                        LoginForm(
                             viewModel = viewModel,
+                            uiState = uiState,
+                            onNavigateToRegister = onNavigateToRegister,
+                            onNavigateToForgotPassword = onNavigateToForgotPassword,
                             modifier = Modifier
                                 .widthIn(max = 600.dp)
                                 .padding(horizontal = 32.dp, vertical = 24.dp)
@@ -101,15 +96,18 @@ fun RegisterScreen(
             Column(modifier = Modifier.fillMaxSize()) {
                 TopHeader(
                     widthSizeClass = widthSizeClass,
-                    onRegisterClick = {},
+                    onRegisterClick = onNavigateToRegister,
                     onHomeClick = onNavigateToHomeFromHeader,
-                    onLoginClick = onNavigateToLogin
+                    onLoginClick = {}
                 )
                 HorizontalDivider(color = Color.White, thickness = 7.dp)
                 
                 // Form with optimized spacing
-                RegisterForm(
+                LoginForm(
                     viewModel = viewModel,
+                    uiState = uiState,
+                    onNavigateToRegister = onNavigateToRegister,
+                    onNavigateToForgotPassword = onNavigateToForgotPassword,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
@@ -124,15 +122,18 @@ fun RegisterScreen(
             Column(modifier = Modifier.fillMaxSize()) {
                 TopHeader(
                     widthSizeClass = widthSizeClass,
-                    onRegisterClick = {},
+                    onRegisterClick = onNavigateToRegister,
                     onHomeClick = onNavigateToHomeFromHeader,
-                    onLoginClick = onNavigateToLogin
+                    onLoginClick = {}
                 )
                 HorizontalDivider(color = Color.White, thickness = 7.dp)
                 
                 // Form with mobile spacing
-                RegisterForm(
+                LoginForm(
                     viewModel = viewModel,
+                    uiState = uiState,
+                    onNavigateToRegister = onNavigateToRegister,
+                    onNavigateToForgotPassword = onNavigateToForgotPassword,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
@@ -146,8 +147,11 @@ fun RegisterScreen(
 }
 
 @Composable
-private fun RegisterForm(
-    viewModel: RegisterViewModel,
+private fun LoginForm(
+    viewModel: LoginViewModel,
+    uiState: com.example.gistaparfume.data.LoginUiState,
+    onNavigateToRegister: () -> Unit,
+    onNavigateToForgotPassword: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -157,83 +161,53 @@ private fun RegisterForm(
     ) {
         // Form Title
         Text(
-            text = "Formulir Registrasi",
+            text = "Formulir Login",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(bottom = 8.dp)
         )
         
-        // Name Input Field
-        NameInputField(
-            value = viewModel.formState.name,
-            onValueChange = viewModel::updateName,
-            modifier = Modifier.fillMaxWidth()
-        )
-        
-        // Email Input Field with validation
+        // Email Input Field
         EmailInputField(
-            value = viewModel.formState.email,
+            value = viewModel.email,
             onValueChange = viewModel::updateEmail,
-            isError = viewModel.formState.emailError != null,
-            errorMessage = viewModel.formState.emailError,
+            isError = !viewModel.isEmailValid,
+            errorMessage = viewModel.emailError,
             modifier = Modifier.fillMaxWidth()
         )
         
-        // Password Input Field with validation
+        // Password Input Field
         PasswordInputField(
-            value = viewModel.formState.password,
+            value = viewModel.password,
             onValueChange = viewModel::updatePassword,
-            isError = viewModel.formState.passwordError != null,
-            errorMessage = viewModel.formState.passwordError,
-            placeholder = "Masukan password minimal 8 character",
-            modifier = Modifier.fillMaxWidth()
-        )
-        
-        // Confirm Password Input Field with validation
-        PasswordInputField(
-            value = viewModel.formState.confirmPassword,
-            onValueChange = viewModel::updateConfirmPassword,
-            isError = viewModel.formState.confirmPasswordError != null,
-            errorMessage = viewModel.formState.confirmPasswordError,
-            placeholder = "Masukan password yang sama",
-            label = "Konfirmasi Password",
             modifier = Modifier.fillMaxWidth()
         )
         
         // Error message display
         ErrorMessageDisplay(
-            errorMessage = viewModel.errorMessage,
+            errorMessage = uiState.errorMessage,
             onDismiss = viewModel::clearError,
             modifier = Modifier.fillMaxWidth()
         )
         
-        // Sign Up Button
-        SignUpButton(
-            isEnabled = viewModel.formState.isFormValid,
-            isLoading = viewModel.isLoading,
-            onClick = viewModel::submitRegistration,
+        // Login Button
+        LoginButton(
+            isEnabled = viewModel.email.isNotEmpty() && viewModel.password.isNotEmpty() && viewModel.isEmailValid,
+            isLoading = uiState.isLoading,
+            onClick = viewModel::login,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp)
         )
+        
+        // Navigation Links
+        NavigationLinks(
+            onNavigateToForgotPassword = onNavigateToForgotPassword,
+            onNavigateToRegister = onNavigateToRegister,
+            modifier = Modifier.padding(top = 16.dp)
+        )
     }
-}
-
-@Composable
-private fun NameInputField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text("Nama") },
-        singleLine = true,
-        modifier = modifier,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
-    )
 }
 
 @Composable
@@ -249,6 +223,7 @@ private fun EmailInputField(
             value = value,
             onValueChange = onValueChange,
             label = { Text("E-mail") },
+            placeholder = { Text("Masukan alamat email") },
             singleLine = true,
             isError = isError,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -271,39 +246,22 @@ private fun EmailInputField(
 private fun PasswordInputField(
     value: String,
     onValueChange: (String) -> Unit,
-    isError: Boolean,
-    errorMessage: String?,
-    placeholder: String,
-    label: String = "Password",
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier) {
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            label = { Text(label) },
-            placeholder = { Text(placeholder) },
-            singleLine = true,
-            isError = isError,
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            modifier = Modifier.fillMaxWidth()
-        )
-        
-        // Error message display
-        if (errorMessage != null) {
-            Text(
-                text = errorMessage,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-            )
-        }
-    }
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text("Password") },
+        placeholder = { Text("Masukan password") },
+        singleLine = true,
+        visualTransformation = PasswordVisualTransformation(),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        modifier = modifier
+    )
 }
 
 @Composable
-private fun SignUpButton(
+private fun LoginButton(
     isEnabled: Boolean,
     isLoading: Boolean,
     onClick: () -> Unit,
@@ -325,14 +283,14 @@ private fun SignUpButton(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
                 Text(
-                    text = "Mendaftar...",
+                    text = "Masuk...",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium
                 )
             }
         } else {
             Text(
-                text = "Sign Up",
+                text = "Login",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium
             )
@@ -341,78 +299,32 @@ private fun SignUpButton(
 }
 
 @Composable
-private fun RegistrationDialogs(viewModel: RegisterViewModel) {
-    // Success Dialog
-    if (viewModel.isRegistrationSuccess) {
-        SuccessDialog(
-            viewModel = viewModel,
-            onDismiss = {
-                viewModel.resetRegistrationSuccess()
-            }
-        )
-    }
-}
-
-@Composable
-private fun SuccessDialog(
-    viewModel: RegisterViewModel,
-    onDismiss: () -> Unit
+private fun NavigationLinks(
+    onNavigateToForgotPassword: () -> Unit,
+    onNavigateToRegister: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    var hasHandledSuccess by remember { mutableStateOf(false) }
-    
-    // Auto-dismiss after 5 seconds and handle success actions
-    LaunchedEffect(Unit) {
-        kotlinx.coroutines.delay(5000L) // 5 seconds delay
-        if (!hasHandledSuccess) {
-            hasHandledSuccess = true
-            viewModel.handleRegistrationSuccess() // Handle toast and navigation after delay
-            onDismiss()
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        TextButton(onClick = onNavigateToForgotPassword) {
+            Text(
+                text = "Forgot Password?",
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 14.sp
+            )
+        }
+        
+        TextButton(onClick = onNavigateToRegister) {
+            Text(
+                text = "Create an Account",
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 14.sp
+            )
         }
     }
-    
-    AlertDialog(
-        onDismissRequest = {
-            // If user manually dismisses, still handle success actions
-            if (!hasHandledSuccess) {
-                hasHandledSuccess = true
-                viewModel.handleRegistrationSuccess()
-            }
-            onDismiss()
-        },
-        title = {
-            Text(
-                text = "Registrasi Berhasil!",
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-        },
-        text = {
-            Text(
-                text = "Akun Anda telah berhasil dibuat. Selamat datang di aplikasi kami!",
-                style = MaterialTheme.typography.bodyMedium
-            )
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    // Handle success actions when OK is clicked
-                    if (!hasHandledSuccess) {
-                        hasHandledSuccess = true
-                        viewModel.handleRegistrationSuccess()
-                    }
-                    onDismiss()
-                }
-            ) {
-                Text(
-                    text = "OK",
-                    fontWeight = FontWeight.Medium
-                )
-            }
-        },
-        containerColor = MaterialTheme.colorScheme.surface,
-        titleContentColor = MaterialTheme.colorScheme.onSurface,
-        textContentColor = MaterialTheme.colorScheme.onSurface
-    )
 }
 
 @Composable

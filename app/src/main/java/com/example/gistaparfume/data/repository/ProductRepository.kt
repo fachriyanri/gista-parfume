@@ -14,6 +14,9 @@ import com.example.gistaparfume.data.dao.CategoryDao
 import com.example.gistaparfume.data.dao.ProductDao
 import com.example.gistaparfume.data.entity.CategoryEntity
 import com.example.gistaparfume.data.entity.ProductEntity
+import com.example.gistaparfume.data.entity.UserEntity
+import com.example.gistaparfume.data.entity.UserRole
+import com.example.gistaparfume.utils.PasswordUtils
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -141,6 +144,28 @@ class ProductRepository(
                 )
             )
             productDao.insertAll(prods) // 'dao' here is the productDao passed to the repository
+
+            // Create admin user during initial setup
+            val userDao = AppDatabaseConfig.getDatabase(context).userDao()
+            
+            // Check if admin user already exists to avoid duplicates
+            val existingAdmin = userDao.findByEmail("admin@mail.com")
+            if (existingAdmin == null) {
+                // Encrypt the admin password
+                val encryptedPassword = PasswordUtils.encryptPassword("@dminGista")
+                
+                // Create admin user entity
+                val adminUser = UserEntity(
+                    name = "admin",
+                    email = "admin@mail.com",
+                    password = encryptedPassword,
+                    role = UserRole.ADMIN,
+                    isActive = true
+                )
+                
+                // Insert admin user into database
+                userDao.insertUser(adminUser)
+            }
 
             // Mark that the data has been seeded so this block never runs again.
             context.dataStore.edit { settings ->
