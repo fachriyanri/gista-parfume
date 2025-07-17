@@ -144,6 +144,231 @@ class UserRepository(
         val emailPattern = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
         return email.matches(emailPattern.toRegex())
     }
+    
+    // New methods for user management operations
+    
+    /**
+     * Gets all users with pagination
+     * @param page Page number (1-based)
+     * @param pageSize Number of users per page
+     * @return List<UserEntity> - List of users for the specified page
+     */
+    suspend fun getAllUsers(page: Int, pageSize: Int): List<UserEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val offset = (page - 1) * pageSize
+                userDao.getAllUsersPaginated(pageSize, offset)
+            } catch (e: Exception) {
+                emptyList()
+            }
+        }
+    }
+    
+    /**
+     * Searches users by name or email with pagination
+     * @param query Search query to match against name or email
+     * @param page Page number (1-based)
+     * @param pageSize Number of users per page
+     * @return List<UserEntity> - List of matching users for the specified page
+     */
+    suspend fun searchUsers(query: String, page: Int, pageSize: Int): List<UserEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val offset = (page - 1) * pageSize
+                val searchQuery = "%$query%"
+                userDao.searchUsers(searchQuery, pageSize, offset)
+            } catch (e: Exception) {
+                emptyList()
+            }
+        }
+    }
+    
+    /**
+     * Gets a user by ID
+     * @param id User ID
+     * @return UserEntity? - User if found, null otherwise
+     */
+    suspend fun getUserById(id: Int): UserEntity? {
+        return withContext(Dispatchers.IO) {
+            try {
+                userDao.getUserById(id)
+            } catch (e: Exception) {
+                null
+            }
+        }
+    }
+    
+    /**
+     * Deletes a user by ID
+     * @param id User ID to delete
+     * @return Result<Unit> - Success or failure result
+     */
+    suspend fun deleteUser(id: Int): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            try {
+                userDao.deleteUser(id)
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(DatabaseException("Gagal menghapus pengguna. Silakan coba lagi."))
+            }
+        }
+    }
+    
+    /**
+     * Gets total count of all users
+     * @return Int - Total number of users
+     */
+    suspend fun getTotalUserCount(): Int {
+        return withContext(Dispatchers.IO) {
+            try {
+                userDao.getTotalUserCount()
+            } catch (e: Exception) {
+                0
+            }
+        }
+    }
+    
+    /**
+     * Gets count of users matching search query
+     * @param query Search query to match against name or email
+     * @return Int - Number of matching users
+     */
+    suspend fun getSearchResultCount(query: String): Int {
+        return withContext(Dispatchers.IO) {
+            try {
+                val searchQuery = "%$query%"
+                userDao.getSearchResultCount(searchQuery)
+            } catch (e: Exception) {
+                0
+            }
+        }
+    }
+    
+    /**
+     * Creates a new user
+     * @param user UserEntity to create
+     * @return Result<Long> - Success with user ID or failure with exception
+     */
+    suspend fun createUser(user: UserEntity): Result<Long> {
+        return withContext(Dispatchers.IO) {
+            try {
+                // Validate input
+                if (user.name.isBlank()) {
+                    return@withContext Result.failure(InvalidInputException("Nama tidak boleh kosong"))
+                }
+                
+                if (user.email.isBlank()) {
+                    return@withContext Result.failure(InvalidInputException("Email tidak boleh kosong"))
+                }
+                
+                if (user.password.isBlank()) {
+                    return@withContext Result.failure(InvalidInputException("Password tidak boleh kosong"))
+                }
+                
+                // Validate email format
+                if (!isValidEmail(user.email)) {
+                    return@withContext Result.failure(InvalidEmailFormatException("Email tidak sesuai format"))
+                }
+                
+                // Check if email already exists
+                val existingUser = try {
+                    userDao.findByEmail(user.email)
+                } catch (e: Exception) {
+                    return@withContext Result.failure(DatabaseConnectionException("Tidak dapat terhubung ke database"))
+                }
+                
+                if (existingUser != null) {
+                    return@withContext Result.failure(EmailAlreadyExistsException("Email ini sudah terdaftar"))
+                }
+                
+                // Insert user into database
+                val userId = try {
+                    userDao.insertUser(user)
+                } catch (e: android.database.sqlite.SQLiteConstraintException) {
+                    return@withContext Result.failure(EmailAlreadyExistsException("Email ini sudah terdaftar"))
+                } catch (e: android.database.sqlite.SQLiteException) {
+                    return@withContext Result.failure(DatabaseException("Terjadi kesalahan database"))
+                } catch (e: Exception) {
+                    return@withContext Result.failure(DatabaseConnectionException("Tidak dapat menyimpan data"))
+                }
+                
+                Result.success(userId)
+                
+            } catch (e: Exception) {
+                when (e) {
+                    is EmailAlreadyExistsException,
+                    is InvalidEmailFormatException,
+                    is InvalidInputException,
+                    is DatabaseException,
+                    is DatabaseConnectionException -> Result.failure(e)
+                    else -> Result.failure(UnexpectedErrorException("Terjadi kesalahan yang tidak terduga"))
+                }
+            }
+        }
+    }
+    
+    /**
+     * Updates an existing user
+     * @param user UserEntity to update
+     * @return Result<Unit> - Success or failure result
+     */
+    suspend fun updateUser(user: UserEntity): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            try {
+                // Validate input
+                if (user.name.isBlank()) {
+                    return@withContext Result.failure(InvalidInputException("Nama tidak boleh kosong"))
+                }
+                
+                if (user.email.isBlank()) {
+                    return@withContext Result.failure(InvalidInputException("Email tidak boleh kosong"))
+                }
+                
+                if (user.password.isBlank()) {
+                    return@withContext Result.failure(InvalidInputException("Password tidak boleh kosong"))
+                }
+                
+                // Validate email format
+                if (!isValidEmail(user.email)) {
+                    return@withContext Result.failure(InvalidEmailFormatException("Email tidak sesuai format"))
+                }
+                
+                // Check if email already exists for another user
+                val existingUser = try {
+                    userDao.findByEmail(user.email)
+                } catch (e: Exception) {
+                    return@withContext Result.failure(DatabaseConnectionException("Tidak dapat terhubung ke database"))
+                }
+                
+                if (existingUser != null && existingUser.id != user.id) {
+                    return@withContext Result.failure(EmailAlreadyExistsException("Email ini sudah digunakan oleh pengguna lain"))
+                }
+                
+                // Update user in database
+                try {
+                    userDao.updateUser(user)
+                } catch (e: android.database.sqlite.SQLiteConstraintException) {
+                    return@withContext Result.failure(EmailAlreadyExistsException("Email ini sudah digunakan oleh pengguna lain"))
+                } catch (e: android.database.sqlite.SQLiteException) {
+                    return@withContext Result.failure(DatabaseException("Terjadi kesalahan database"))
+                } catch (e: Exception) {
+                    return@withContext Result.failure(DatabaseConnectionException("Tidak dapat memperbarui data"))
+                }
+                
+                Result.success(Unit)
+                
+            } catch (e: Exception) {
+                when (e) {
+                    is EmailAlreadyExistsException,
+                    is InvalidEmailFormatException,
+                    is InvalidInputException,
+                    is DatabaseException,
+                    is DatabaseConnectionException -> Result.failure(e)
+                    else -> Result.failure(UnexpectedErrorException("Terjadi kesalahan yang tidak terduga"))
+                }
+            }
+        }
+    }
 
     
     companion object {

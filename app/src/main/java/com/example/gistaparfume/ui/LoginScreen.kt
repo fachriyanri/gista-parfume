@@ -43,7 +43,8 @@ fun LoginScreen(
     onNavigateToHome: () -> Unit = {},
     onNavigateToRegister: () -> Unit = {},
     onNavigateToForgotPassword: () -> Unit = {},
-    onNavigateToHomeFromHeader: () -> Unit = {}
+    onNavigateToHomeFromHeader: () -> Unit = {},
+    onUserManagementClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     

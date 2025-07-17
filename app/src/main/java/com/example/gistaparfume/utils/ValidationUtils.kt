@@ -1,5 +1,6 @@
 package com.example.gistaparfume.utils
 
+import com.example.gistaparfume.data.entity.UserRole
 import java.util.regex.Pattern
 
 /**
@@ -54,6 +55,47 @@ object ValidationUtils {
         } else {
             ValidationResult(isValid = true, errorMessage = null)
         }
+    }
+    
+    /**
+     * Validates name field for required input
+     * @param name The name string to validate
+     * @return ValidationResult containing validation status and error message
+     */
+    fun validateName(name: String): ValidationResult {
+        return if (name.isBlank()) {
+            ValidationResult(isValid = false, errorMessage = "Nama harus diisi")
+        } else {
+            ValidationResult(isValid = true, errorMessage = null)
+        }
+    }
+    
+    /**
+     * Validates role selection to ensure a valid role is selected
+     * Since UserRole is an enum with valid values, this validation ensures
+     * that the role selection UI properly prevents multiple selections
+     * @param role The selected UserRole
+     * @return ValidationResult containing validation status and error message
+     */
+    fun validateRole(role: UserRole): ValidationResult {
+        // Role is always valid since it's a non-nullable enum
+        // This function exists to maintain consistency and can be extended
+        // for additional role-specific validation if needed
+        return ValidationResult(isValid = true, errorMessage = null)
+    }
+    
+    /**
+     * Validates status selection to ensure a valid status is selected
+     * Since Boolean has valid values, this validation ensures
+     * that the status selection UI properly prevents multiple selections
+     * @param isActive The selected status (true for Aktif, false for Tidak Aktif)
+     * @return ValidationResult containing validation status and error message
+     */
+    fun validateStatus(isActive: Boolean): ValidationResult {
+        // Status is always valid since it's a non-nullable boolean
+        // This function exists to maintain consistency and can be extended
+        // for additional status-specific validation if needed
+        return ValidationResult(isValid = true, errorMessage = null)
     }
 }
 

@@ -79,6 +79,9 @@ dependencies {
     // JavaMail API for email functionality
     implementation("com.sun.mail:android-mail:1.6.7")
     implementation("com.sun.mail:android-activation:1.6.7")
+    
+    // Image loading with Coil
+    implementation("io.coil-kt:coil-compose:2.5.0")
 
     // Debug dependencies
     debugImplementation(libs.androidx.ui.tooling)

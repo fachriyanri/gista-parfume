@@ -3,6 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    
+    <!-- Image handling permissions -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" 
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    
+    <!-- Optional: Camera permission if we want to add camera capture later -->
+    <!-- <uses-permission android:name="android.permission.CAMERA" /> -->
 
     <application
         android:allowBackup="true"

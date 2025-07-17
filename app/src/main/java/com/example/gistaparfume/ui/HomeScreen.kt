@@ -46,7 +46,8 @@ fun HomeScreen(
     onLoginClick: () -> Unit = {},
     currentUser: com.example.gistaparfume.data.entity.UserEntity? = null,
     isLoggedIn: Boolean = false,
-    onLogout: () -> Unit = {}
+    onLogout: () -> Unit = {},
+    onUserManagementClick: () -> Unit = {}
 ) {
     var showSidebarMobile by remember { mutableStateOf(false) }
 
@@ -66,7 +67,8 @@ fun HomeScreen(
                         onLoginClick = onLoginClick,
                         currentUser = currentUser,
                         isLoggedIn = isLoggedIn,
-                        onLogout = onLogout
+                        onLogout = onLogout,
+                        onUserManagementClick = onUserManagementClick
                     )
                     HorizontalDivider(color = Color.White, thickness = 7.dp)
                     MainHeader()
@@ -118,7 +120,8 @@ fun HomeScreen(
                         onLoginClick = onLoginClick,
                         currentUser = currentUser,
                         isLoggedIn = isLoggedIn,
-                        onLogout = onLogout
+                        onLogout = onLogout,
+                        onUserManagementClick = onUserManagementClick
                     )
                     HorizontalDivider(color = Color.White, thickness = 7.dp)
                     MainHeader()
@@ -175,7 +178,8 @@ fun HomeScreen(
                         onLoginClick = onLoginClick,
                         currentUser = currentUser,
                         isLoggedIn = isLoggedIn,
-                        onLogout = onLogout
+                        onLogout = onLogout,
+                        onUserManagementClick = onUserManagementClick
                     )
                     HorizontalDivider(color = Color.White, thickness = 7.dp)
                     MainHeader()

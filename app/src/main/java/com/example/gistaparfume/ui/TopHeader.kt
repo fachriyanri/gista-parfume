@@ -37,7 +37,8 @@ fun TopHeader(
     onLoginClick: () -> Unit = {},
     currentUser: com.example.gistaparfume.data.entity.UserEntity? = null,
     isLoggedIn: Boolean = false,
-    onLogout: () -> Unit = {}
+    onLogout: () -> Unit = {},
+    onUserManagementClick: () -> Unit = {}
 ) {
     val isCompact = widthSizeClass == WindowWidthSizeClass.Compact
 
@@ -63,7 +64,8 @@ fun TopHeader(
                     onLoginClick = onLoginClick,
                     currentUser = currentUser,
                     isLoggedIn = isLoggedIn,
-                    onLogout = onLogout
+                    onLogout = onLogout,
+                    onUserManagementClick = onUserManagementClick
                 )
             }
         }
@@ -84,7 +86,8 @@ fun TopHeader(
                     onLoginClick = onLoginClick,
                     currentUser = currentUser,
                     isLoggedIn = isLoggedIn,
-                    onLogout = onLogout
+                    onLogout = onLogout,
+                    onUserManagementClick = onUserManagementClick
                 )
             }
         }
@@ -108,7 +111,8 @@ fun NavButtons(
     onLoginClick: () -> Unit = {},
     currentUser: com.example.gistaparfume.data.entity.UserEntity? = null,
     isLoggedIn: Boolean = false,
-    onLogout: () -> Unit = {}
+    onLogout: () -> Unit = {},
+    onUserManagementClick: () -> Unit = {}
 ) {
     var showUserDropdown by remember { mutableStateOf(false) }
     var showManageDropdown by remember { mutableStateOf(false) }
@@ -170,7 +174,7 @@ fun NavButtons(
                         text = { Text("pengguna") },
                         onClick = {
                             showManageDropdown = false
-                            // TODO: Navigate to user management
+                            onUserManagementClick()
                         }
                     )
                     DropdownMenuItem(
