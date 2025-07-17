@@ -64,6 +64,9 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material3.window.size.class1.android)
     implementation(libs.androidx.datastore.preferences)
+    
+    // Material Icons Extended for additional icons
+    implementation("androidx.compose.material:material-icons-extended")
 
     // Navigation Compose - Now using version catalog
     implementation(libs.androidx.navigation.compose)

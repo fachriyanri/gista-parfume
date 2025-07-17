@@ -15,14 +15,17 @@ import androidx.navigation.compose.rememberNavController
 import com.example.gistaparfume.data.viewmodel.CategoryViewModel
 import com.example.gistaparfume.data.viewmodel.LoginViewModel
 import com.example.gistaparfume.data.viewmodel.ProductViewModel
+import com.example.gistaparfume.data.viewmodel.ProfileViewModel
 import com.example.gistaparfume.data.viewmodel.RegisterViewModel
 import com.example.gistaparfume.data.viewmodel.UserManagementViewModel
 import com.example.gistaparfume.navigation.NavigationRoutes
 import com.example.gistaparfume.ui.AddUserScreen
+import com.example.gistaparfume.ui.EditProfileScreen
 import com.example.gistaparfume.ui.EditUserScreen
 import com.example.gistaparfume.ui.ForgotPasswordScreen
 import com.example.gistaparfume.ui.HomeScreen
 import com.example.gistaparfume.ui.LoginScreen
+import com.example.gistaparfume.ui.ProfileScreen
 import com.example.gistaparfume.ui.RegisterScreen
 import com.example.gistaparfume.ui.ResetPasswordScreen
 import com.example.gistaparfume.ui.UserManagementScreen
@@ -35,6 +38,7 @@ class MainActivity : ComponentActivity() {
     private val registerViewModel: RegisterViewModel by viewModels()
     private val loginViewModel: LoginViewModel by viewModels()
     private val userManagementViewModel: UserManagementViewModel by viewModels()
+    private val profileViewModel: ProfileViewModel by viewModels()
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -116,6 +120,9 @@ class MainActivity : ComponentActivity() {
                             },
                             onUserManagementClick = {
                                 navController.navigate(NavigationRoutes.USER_MANAGEMENT)
+                            },
+                            onProfileClick = {
+                                navController.navigate(NavigationRoutes.PROFILE)
                             }
                         )
                     }
@@ -324,6 +331,79 @@ class MainActivity : ComponentActivity() {
                             onShowToast = { message ->
                                 CustomToast.showRegistrationSuccessToast(this@MainActivity, message)
                             }
+                        )
+                    }
+                    
+                    composable(NavigationRoutes.PROFILE) {
+                        // Load user profile when entering profile screen
+                        LaunchedEffect(loginUiState.currentUser?.id) {
+                            loginUiState.currentUser?.id?.let { userId ->
+                                profileViewModel.loadUserProfile(userId)
+                            }
+                        }
+                        
+                        ProfileScreen(
+                            profileViewModel = profileViewModel,
+                            currentUser = loginUiState.currentUser,
+                            widthSizeClass = windowSizeClass.widthSizeClass,
+                            onHomeClick = {
+                                navController.navigate(NavigationRoutes.HOME)
+                            },
+                            onLogout = {
+                                loginViewModel.logout()
+                            },
+                            onEditProfileClick = {
+                                navController.navigate(NavigationRoutes.EDIT_PROFILE)
+                            },
+                            onUserManagementClick = {
+                                navController.navigate(NavigationRoutes.USER_MANAGEMENT)
+                            },
+                            isLoggedIn = loginUiState.isLoggedIn
+                        )
+                    }
+                    
+                    composable(NavigationRoutes.EDIT_PROFILE) {
+                        val profileUiState by profileViewModel.profileUiState.collectAsState()
+                        val formState by profileViewModel.formState.collectAsState()
+                        
+                        // Load user profile and initialize form when entering edit profile screen
+                        LaunchedEffect(loginUiState.currentUser?.id) {
+                            loginUiState.currentUser?.id?.let { userId ->
+                                profileViewModel.loadUserProfile(userId)
+                            }
+                        }
+                        
+                        // Navigate back to profile screen after successful update
+                        LaunchedEffect(formState.isUpdateSuccessful) {
+                            if (formState.isUpdateSuccessful) {
+                                navController.navigate(NavigationRoutes.PROFILE, NavOptions.Builder()
+                                    .setPopUpTo(NavigationRoutes.PROFILE, inclusive = false)
+                                    .build())
+                            }
+                        }
+                        
+                        EditProfileScreen(
+                            profileViewModel = profileViewModel,
+                            currentUser = loginUiState.currentUser,
+                            widthSizeClass = windowSizeClass.widthSizeClass,
+                            onHomeClick = {
+                                navController.navigate(NavigationRoutes.HOME)
+                            },
+                            onLogout = {
+                                loginViewModel.logout()
+                            },
+                            onNavigateBack = {
+                                navController.navigate(
+                                    NavigationRoutes.PROFILE, NavOptions.Builder()
+                                        .setPopUpTo(NavigationRoutes.PROFILE, inclusive = false)
+                                        .build()
+                                )
+                            },
+                            onProfileClick = { navController.navigate(NavigationRoutes.PROFILE) },
+                            onUserManagementClick = {
+                                navController.navigate(NavigationRoutes.USER_MANAGEMENT)
+                            },
+                            isLoggedIn = loginUiState.isLoggedIn
                         )
                     }
                 }
