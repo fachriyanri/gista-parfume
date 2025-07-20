@@ -7,11 +7,12 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.gistaparfume.data.entity.CategoryEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CategoryDao {
-    @Query("SELECT * FROM category")
-    suspend fun getAll(): List<CategoryEntity>
+    @Query("SELECT * FROM category ORDER BY title COLLATE NOCASE ASC ")
+    fun getAll(): Flow<List<CategoryEntity>>
 
     @Query("SELECT * FROM category WHERE id = :id")
     suspend fun getById(id: Int): CategoryEntity?
@@ -30,7 +31,7 @@ interface CategoryDao {
 
     @Query("""
       SELECT * FROM category 
-      ORDER BY title ASC 
+      ORDER BY title COLLATE NOCASE ASC
       LIMIT :limit OFFSET :offset
     """)
     suspend fun getPaged(limit: Int, offset: Int): List<CategoryEntity>

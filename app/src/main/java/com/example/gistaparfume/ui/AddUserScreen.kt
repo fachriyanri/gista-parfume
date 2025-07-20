@@ -83,7 +83,8 @@ fun AddUserScreen(
     currentUser: UserEntity? = null,
     isLoggedIn: Boolean = false,
     onShowToast: (String) -> Unit = {},
-    onNavigateToUserManagement: () -> Unit = {}
+    onNavigateToUserManagement: () -> Unit = {},
+    onProfileClick: () -> Unit,
 ) {
     LaunchedEffect(isLoggedIn) {
         if (!isLoggedIn) {
@@ -167,7 +168,8 @@ fun AddUserScreen(
                         currentUser = currentUser,
                         isLoggedIn = isLoggedIn,
                         onLogout = onLogout,
-                        onUserManagementClick = onNavigateToUserManagement
+                        onUserManagementClick = onNavigateToUserManagement,
+                        onProfileClick = onProfileClick
                     )
                     HorizontalDivider(color = Color.White, thickness = 7.dp)
 
@@ -206,7 +208,8 @@ fun AddUserScreen(
                     currentUser = currentUser,
                     isLoggedIn = isLoggedIn,
                     onLogout = onLogout,
-                    onUserManagementClick = onNavigateToUserManagement
+                    onUserManagementClick = onNavigateToUserManagement,
+                    onProfileClick = onProfileClick
                 )
                 HorizontalDivider(color = Color.White, thickness = 7.dp)
 
@@ -238,7 +241,8 @@ fun AddUserScreen(
                     currentUser = currentUser,
                     isLoggedIn = isLoggedIn,
                     onLogout = onLogout,
-                    onUserManagementClick = onNavigateToUserManagement
+                    onUserManagementClick = onNavigateToUserManagement,
+                    onProfileClick = onProfileClick
                 )
                 HorizontalDivider(color = Color.White, thickness = 7.dp)
 

@@ -12,14 +12,20 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.gistaparfume.data.viewmodel.AddCategoryViewModel
+import com.example.gistaparfume.data.viewmodel.CategoryManagementViewModel
 import com.example.gistaparfume.data.viewmodel.CategoryViewModel
+import com.example.gistaparfume.data.viewmodel.EditCategoryViewModel
 import com.example.gistaparfume.data.viewmodel.LoginViewModel
 import com.example.gistaparfume.data.viewmodel.ProductViewModel
 import com.example.gistaparfume.data.viewmodel.ProfileViewModel
 import com.example.gistaparfume.data.viewmodel.RegisterViewModel
 import com.example.gistaparfume.data.viewmodel.UserManagementViewModel
 import com.example.gistaparfume.navigation.NavigationRoutes
+import com.example.gistaparfume.ui.AddCategoryScreen
 import com.example.gistaparfume.ui.AddUserScreen
+import com.example.gistaparfume.ui.CategoryManagementScreen
+import com.example.gistaparfume.ui.EditCategoryScreen
 import com.example.gistaparfume.ui.EditProfileScreen
 import com.example.gistaparfume.ui.EditUserScreen
 import com.example.gistaparfume.ui.ForgotPasswordScreen
@@ -35,6 +41,9 @@ import com.example.gistaparfume.utils.CustomToast
 class MainActivity : ComponentActivity() {
     private val productViewModel: ProductViewModel by viewModels()
     private val categoryViewModel: CategoryViewModel by viewModels()
+    private val categoryManagementViewModel: CategoryManagementViewModel by viewModels()
+    private val addCategoryViewModel: AddCategoryViewModel by viewModels()
+    private val editCategoryViewModel: EditCategoryViewModel by viewModels()
     private val registerViewModel: RegisterViewModel by viewModels()
     private val loginViewModel: LoginViewModel by viewModels()
     private val userManagementViewModel: UserManagementViewModel by viewModels()
@@ -60,7 +69,6 @@ class MainActivity : ComponentActivity() {
 
                 LaunchedEffect(Unit) {
                     productViewModel.setupDatabase()
-                    categoryViewModel.loadCategories()
                     productViewModel.initialize()
                     
                     // Check authentication state on app startup
@@ -121,6 +129,109 @@ class MainActivity : ComponentActivity() {
                             onUserManagementClick = {
                                 navController.navigate(NavigationRoutes.USER_MANAGEMENT)
                             },
+                            onProfileClick = {
+                                navController.navigate(NavigationRoutes.PROFILE)
+                            },
+                            onCategoryManagementClick = {
+                                navController.navigate(NavigationRoutes.CATEGORY_MANAGEMENT)
+                            }
+                        )
+                    }
+                    
+                    composable(NavigationRoutes.CATEGORY_MANAGEMENT) {
+                        // Clear any form state when entering category management screen
+                        LaunchedEffect(Unit) {
+                            categoryManagementViewModel.clearError()
+                        }
+                        
+                        CategoryManagementScreen(
+                            widthSizeClass = windowSizeClass.widthSizeClass,
+                            viewModel = categoryManagementViewModel,
+                            onHomeClick = {
+                                navController.navigate(NavigationRoutes.HOME)
+                            },
+                            onLogout = {
+                                loginViewModel.logout()
+                            },
+                            onAddCategoryClick = {
+                                navController.navigate(NavigationRoutes.ADD_CATEGORY)
+                            },
+                            onEditCategoryClick = { categoryId ->
+                                navController.navigate(NavigationRoutes.createEditCategoryRoute(categoryId))
+                            },
+                            onUserManagementClick = {
+                                navController.navigate(NavigationRoutes.USER_MANAGEMENT)
+                            },
+                            currentUser = loginUiState.currentUser,
+                            isLoggedIn = loginUiState.isLoggedIn,
+                            onProfileClick = {
+                                navController.navigate(NavigationRoutes.PROFILE)
+                            }
+                        )
+                    }
+                    
+                    composable(NavigationRoutes.ADD_CATEGORY) {
+                        // Reset form when entering add category screen
+                        LaunchedEffect(Unit) {
+                            addCategoryViewModel.resetForm()
+                            addCategoryViewModel.clearOperationSuccess()
+                        }
+                        
+                        AddCategoryScreen(
+                            widthSizeClass = windowSizeClass.widthSizeClass,
+                            viewModel = addCategoryViewModel,
+                            onNavigateToHome = {
+                                navController.navigate(NavigationRoutes.HOME)
+                            },
+                            onLogout = {
+                                loginViewModel.logout()
+                            },
+                            onNavigateToCategoryManagement = {
+                                navController.navigate(NavigationRoutes.CATEGORY_MANAGEMENT, NavOptions.Builder()
+                                    .setPopUpTo(NavigationRoutes.CATEGORY_MANAGEMENT, inclusive = false)
+                                    .build())
+                            },
+                            onUserManagementClick = {
+                                navController.navigate(NavigationRoutes.USER_MANAGEMENT)
+                            },
+                            currentUser = loginUiState.currentUser,
+                            isLoggedIn = loginUiState.isLoggedIn,
+                            onProfileClick = {
+                                navController.navigate(NavigationRoutes.PROFILE)
+                            }
+                        )
+                    }
+                    
+                    composable(NavigationRoutes.EDIT_CATEGORY) { backStackEntry ->
+                        val categoryId = backStackEntry.arguments?.getString("categoryId")?.toIntOrNull() ?: 0
+                        
+                        // Clear form state when entering edit category screen
+                        LaunchedEffect(categoryId) {
+                            if (categoryId > 0) {
+                                editCategoryViewModel.clearOperationSuccess()
+                            }
+                        }
+                        
+                        EditCategoryScreen(
+                            categoryId = categoryId,
+                            widthSizeClass = windowSizeClass.widthSizeClass,
+                            viewModel = editCategoryViewModel,
+                            onNavigateToHome = {
+                                navController.navigate(NavigationRoutes.HOME)
+                            },
+                            onLogout = {
+                                loginViewModel.logout()
+                            },
+                            onNavigateToCategoryManagement = {
+                                navController.navigate(NavigationRoutes.CATEGORY_MANAGEMENT, NavOptions.Builder()
+                                    .setPopUpTo(NavigationRoutes.CATEGORY_MANAGEMENT, inclusive = false)
+                                    .build())
+                            },
+                            onUserManagementClick = {
+                                navController.navigate(NavigationRoutes.USER_MANAGEMENT)
+                            },
+                            currentUser = loginUiState.currentUser,
+                            isLoggedIn = loginUiState.isLoggedIn,
                             onProfileClick = {
                                 navController.navigate(NavigationRoutes.PROFILE)
                             }
@@ -238,7 +349,10 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate(NavigationRoutes.createEditUserRoute(userId))
                             },
                             currentUser = loginUiState.currentUser,
-                            isLoggedIn = loginUiState.isLoggedIn
+                            isLoggedIn = loginUiState.isLoggedIn,
+                            onProfileClick = {
+                                navController.navigate(NavigationRoutes.PROFILE)
+                            }
                         )
                     }
                     
@@ -279,6 +393,9 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate(NavigationRoutes.USER_MANAGEMENT, NavOptions.Builder()
                                     .setPopUpTo(NavigationRoutes.USER_MANAGEMENT, inclusive = false)
                                     .build())
+                            },
+                            onProfileClick = {
+                                navController.navigate(NavigationRoutes.PROFILE)
                             }
                         )
                     }
@@ -328,9 +445,7 @@ class MainActivity : ComponentActivity() {
                             },
                             currentUser = loginUiState.currentUser,
                             isLoggedIn = loginUiState.isLoggedIn,
-                            onShowToast = { message ->
-                                CustomToast.showRegistrationSuccessToast(this@MainActivity, message)
-                            }
+                            onProfileClick = { navController.navigate(NavigationRoutes.PROFILE) }
                         )
                     }
                     

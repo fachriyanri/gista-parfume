@@ -75,7 +75,8 @@ fun UserManagementScreen(
     onEditUserClick: (Int) -> Unit = {},
     currentUser: UserEntity? = null,
     isLoggedIn: Boolean = false,
-    viewModel: UserManagementViewModel = viewModel()
+    viewModel: UserManagementViewModel = viewModel(),
+    onProfileClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var searchText by remember { mutableStateOf("") }
@@ -104,7 +105,8 @@ fun UserManagementScreen(
             currentUser = currentUser,
             isLoggedIn = isLoggedIn,
             onLogout = onLogout,
-            onUserManagementClick = {} // Already on user management screen
+            onUserManagementClick = {}, // Already on user management screen
+            onProfileClick = onProfileClick
         )
 
         HorizontalDivider(color = Color.White, thickness = 7.dp)

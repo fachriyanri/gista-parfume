@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.gistaparfume.data.Product
+import com.example.gistaparfume.data.entity.UserEntity
 import com.example.gistaparfume.ui.components.ModalSidebarContent
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,10 +45,11 @@ fun HomeScreen(
     widthSizeClass: WindowWidthSizeClass,
     onRegisterClick: () -> Unit = {},
     onLoginClick: () -> Unit = {},
-    currentUser: com.example.gistaparfume.data.entity.UserEntity? = null,
+    currentUser: UserEntity? = null,
     isLoggedIn: Boolean = false,
     onLogout: () -> Unit = {},
     onUserManagementClick: () -> Unit = {},
+    onCategoryManagementClick: () -> Unit = {},
     onProfileClick: () -> Unit = {}
 ) {
     var showSidebarMobile by remember { mutableStateOf(false) }
@@ -70,6 +72,7 @@ fun HomeScreen(
                         isLoggedIn = isLoggedIn,
                         onLogout = onLogout,
                         onUserManagementClick = onUserManagementClick,
+                        onCategoryManagementClick = onCategoryManagementClick,
                         onProfileClick = onProfileClick
                     )
                     HorizontalDivider(color = Color.White, thickness = 7.dp)
@@ -124,6 +127,7 @@ fun HomeScreen(
                         isLoggedIn = isLoggedIn,
                         onLogout = onLogout,
                         onUserManagementClick = onUserManagementClick,
+                        onCategoryManagementClick = onCategoryManagementClick,
                         onProfileClick = onProfileClick
                     )
                     HorizontalDivider(color = Color.White, thickness = 7.dp)
@@ -183,6 +187,7 @@ fun HomeScreen(
                         isLoggedIn = isLoggedIn,
                         onLogout = onLogout,
                         onUserManagementClick = onUserManagementClick,
+                        onCategoryManagementClick = onCategoryManagementClick,
                         onProfileClick = onProfileClick
                     )
                     HorizontalDivider(color = Color.White, thickness = 7.dp)

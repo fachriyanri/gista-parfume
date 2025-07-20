@@ -3,7 +3,6 @@ package com.example.gistaparfume.ui
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -45,11 +44,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -65,8 +59,8 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.gistaparfume.data.UserFormState
-import com.example.gistaparfume.data.entity.UserRole
 import com.example.gistaparfume.data.entity.UserEntity
+import com.example.gistaparfume.data.entity.UserRole
 import com.example.gistaparfume.utils.ImageUtils
 
 @Composable
@@ -86,7 +80,7 @@ fun EditUserScreen(
     onLogout: () -> Unit,
     currentUser: UserEntity? = null,
     isLoggedIn: Boolean = false,
-    onShowToast: (String) -> Unit = {}
+    onProfileClick: () -> Unit,
 ) {
     LaunchedEffect(isLoggedIn) {
         if (!isLoggedIn) {
@@ -137,7 +131,8 @@ fun EditUserScreen(
                         currentUser = currentUser,
                         isLoggedIn = isLoggedIn,
                         onLogout = onLogout,
-                        onUserManagementClick = {} // Part of user management flow
+                        onUserManagementClick = {}, // Part of user management flow
+                        onProfileClick = onProfileClick
                     )
                     HorizontalDivider(color = Color.White, thickness = 7.dp)
 
@@ -176,7 +171,8 @@ fun EditUserScreen(
                     currentUser = currentUser,
                     isLoggedIn = isLoggedIn,
                     onLogout = onLogout,
-                    onUserManagementClick = {} // Part of user management flow
+                    onUserManagementClick = {}, // Part of user management flow,
+                    onProfileClick = onProfileClick
                 )
                 HorizontalDivider(color = Color.White, thickness = 7.dp)
 
@@ -208,7 +204,8 @@ fun EditUserScreen(
                     currentUser = currentUser,
                     isLoggedIn = isLoggedIn,
                     onLogout = onLogout,
-                    onUserManagementClick = {} // Part of user management flow
+                    onUserManagementClick = {}, // Part of user management flow
+                    onProfileClick = onProfileClick
                 )
                 HorizontalDivider(color = Color.White, thickness = 7.dp)
 

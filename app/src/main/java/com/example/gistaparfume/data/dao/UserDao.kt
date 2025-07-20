@@ -18,12 +18,12 @@ interface UserDao {
     suspend fun updateUser(user: UserEntity)
     
     // New methods for user management operations
-    @Query("SELECT * FROM user ORDER BY name ASC LIMIT :limit OFFSET :offset")
+    @Query("SELECT * FROM user ORDER BY name COLLATE NOCASE ASC LIMIT :limit OFFSET :offset")
     suspend fun getAllUsersPaginated(limit: Int, offset: Int): List<UserEntity>
-    
-    @Query("SELECT * FROM user WHERE name LIKE :query OR email LIKE :query ORDER BY name ASC LIMIT :limit OFFSET :offset")
+
+    @Query("SELECT * FROM user WHERE name LIKE :query OR email LIKE :query ORDER BY name COLLATE NOCASE ASC LIMIT :limit OFFSET :offset")
     suspend fun searchUsers(query: String, limit: Int, offset: Int): List<UserEntity>
-    
+
     @Query("SELECT * FROM user WHERE id = :id")
     suspend fun getUserById(id: Int): UserEntity?
     

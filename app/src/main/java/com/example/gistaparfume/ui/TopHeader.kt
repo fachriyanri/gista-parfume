@@ -39,6 +39,7 @@ fun TopHeader(
     isLoggedIn: Boolean = false,
     onLogout: () -> Unit = {},
     onUserManagementClick: () -> Unit = {},
+    onCategoryManagementClick: () -> Unit = {},
     onProfileClick: () -> Unit = {}
 ) {
     val isCompact = widthSizeClass == WindowWidthSizeClass.Compact
@@ -67,6 +68,7 @@ fun TopHeader(
                     isLoggedIn = isLoggedIn,
                     onLogout = onLogout,
                     onUserManagementClick = onUserManagementClick,
+                    onCategoryManagementClick = onCategoryManagementClick,
                     onProfileClick = onProfileClick
                 )
             }
@@ -90,6 +92,7 @@ fun TopHeader(
                     isLoggedIn = isLoggedIn,
                     onLogout = onLogout,
                     onUserManagementClick = onUserManagementClick,
+                    onCategoryManagementClick = onCategoryManagementClick,
                     onProfileClick = onProfileClick
                 )
             }
@@ -116,6 +119,7 @@ fun NavButtons(
     isLoggedIn: Boolean = false,
     onLogout: () -> Unit = {},
     onUserManagementClick: () -> Unit = {},
+    onCategoryManagementClick: () -> Unit = {},
     onProfileClick: () -> Unit = {}
 ) {
     var showUserDropdown by remember { mutableStateOf(false) }
@@ -157,7 +161,7 @@ fun NavButtons(
                         text = { Text("kategori") },
                         onClick = {
                             showManageDropdown = false
-                            // TODO: Navigate to category management
+                            onCategoryManagementClick()
                         }
                     )
                     DropdownMenuItem(
