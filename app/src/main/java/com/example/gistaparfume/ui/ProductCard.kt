@@ -62,7 +62,6 @@ fun ProductCard(
         val qtyWidth: Dp,
         val fieldHeight: Dp,
         val addToCartHeight: Dp,
-        val addToCartWidth: Dp,
         val topSpacing:Dp,
         val btnText: String
     )
@@ -78,7 +77,6 @@ fun ProductCard(
             qtyWidth = 60.dp,
             fieldHeight = 40.dp,
             addToCartHeight = 36.dp,
-            addToCartWidth = 100.dp,
             topSpacing = 0.dp,
             btnText = "Tambah\nKe Keranjang"
         )
@@ -92,7 +90,6 @@ fun ProductCard(
             qtyWidth = 70.dp,
             fieldHeight = 40.dp,
             addToCartHeight = 36.dp,
-            addToCartWidth = 150.dp,
             topSpacing = 0.dp,
             btnText = "Tambah Ke Keranjang"
         )
@@ -106,7 +103,6 @@ fun ProductCard(
             qtyWidth = 80.dp,
             fieldHeight = 40.dp, // 40.dp
             addToCartHeight = 40.dp,
-            addToCartWidth = 150.dp,
             topSpacing = 60.dp,
             btnText = "Tambah Ke Keranjang"
         )
@@ -131,7 +127,7 @@ fun ProductCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(style.imageHeight),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Fit
             )
             Spacer(Modifier.height(4.dp))
             Text(
@@ -199,9 +195,7 @@ fun ProductCard(
                         val quantityInt = quantity.toIntOrNull()?.coerceAtLeast(1) ?: 1
                         onAddToCart(product, quantityInt)
                     },
-                    modifier = Modifier
-                        .height(style.addToCartHeight)
-                        .width(style.addToCartWidth),
+                    modifier = Modifier.height(style.addToCartHeight).weight(1f), // Use weight for flexibility
                     contentPadding = PaddingValues(horizontal = style.padding)
                 ) {
                     Text(

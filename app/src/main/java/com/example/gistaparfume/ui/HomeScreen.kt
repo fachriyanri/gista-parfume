@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -176,48 +177,51 @@ fun HomeScreen(
             }
         }
         else -> {
-            // ===== COMPACT / MOBILE =====
-            Box(modifier = Modifier.fillMaxSize()) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    TopHeader(
-                        widthSizeClass = widthSizeClass,
-                        onRegisterClick = onRegisterClick,
-                        onLoginClick = onLoginClick,
-                        currentUser = currentUser,
-                        isLoggedIn = isLoggedIn,
-                        onLogout = onLogout,
-                        onUserManagementClick = onUserManagementClick,
-                        onCategoryManagementClick = onCategoryManagementClick,
-                        onProfileClick = onProfileClick
-                    )
-                    HorizontalDivider(color = Color.White, thickness = 7.dp)
-                    MainHeader()
-                    FilterBar(
-                        selectedCategory = selectedCategory,
-                        onSortByPrice = onSortByPrice,
-                        onFilterClick = { showSidebarMobile = !showSidebarMobile },
-                        widthSizeClass = widthSizeClass,
-                        sortDescending = sortDescending,
-                        onResetFilters = onResetFilters,
-                        isAnyFilterActive = isAnyFilterActive,
-                    )
+            // ===== COMPACT / MOBILE with Scaffold =====
+            var showSidebarMobile by remember { mutableStateOf(false) }
 
-                    // grid 1 kolom, fill sisa height
-                    MainContent(
-                        products = products,
-                        isLoading = isLoading,
-                        onLoadMore = onLoadMore,
-                        onAddToCart = onAddToCart,
-                        widthSizeClass = widthSizeClass,
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(86.dp))
-
+            // Replace the Box -> Column structure with Scaffold
+            Scaffold(
+                topBar = {
+                    // All top content goes in the topBar slot
+                    Column {
+                        TopHeader(
+                            widthSizeClass = widthSizeClass, onRegisterClick = onRegisterClick,
+                            onLoginClick = onLoginClick, currentUser = currentUser,
+                            isLoggedIn = isLoggedIn, onLogout = onLogout,
+                            onUserManagementClick = onUserManagementClick,
+                            onCategoryManagementClick = onCategoryManagementClick,
+                            onProfileClick = onProfileClick
+                        )
+                        HorizontalDivider(color = Color.White, thickness = 7.dp)
+                        MainHeader()
+                        FilterBar(
+                            selectedCategory = selectedCategory, onSortByPrice = onSortByPrice,
+                            onFilterClick = { showSidebarMobile = !showSidebarMobile },
+                            widthSizeClass = widthSizeClass, sortDescending = sortDescending,
+                            onResetFilters = onResetFilters, isAnyFilterActive = isAnyFilterActive
+                        )
+                    }
+                },
+                bottomBar = {
+                    // The footer goes in the bottomBar slot
                     Footer(widthSizeClass)
                 }
+            ) { innerPadding ->
+                // The main content of the screen goes here.
+                // Scaffold provides the correct padding automatically.
+                MainContent(
+                    products = products,
+                    isLoading = isLoading,
+                    onLoadMore = onLoadMore,
+                    onAddToCart = onAddToCart,
+                    widthSizeClass = widthSizeClass,
+                    // Apply the padding from the Scaffold
+                    modifier = Modifier.padding(innerPadding)
+                )
+
+                // The ModalBottomSheet can be placed here as well.
+                // It will draw on top of the content.
                 if (showSidebarMobile) {
                     ModalBottomSheet(onDismissRequest = { showSidebarMobile = false }) {
                         ModalSidebarContent(

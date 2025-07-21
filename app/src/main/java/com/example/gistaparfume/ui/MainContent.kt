@@ -30,16 +30,14 @@ fun MainContent(
     widthSizeClass: WindowWidthSizeClass,
     modifier: Modifier = Modifier
 ) {
-    val cols = 2
 
     // 3. Create and remember the state of the grid to track scrolling
     val gridState = rememberLazyGridState()
 
     LazyVerticalGrid(
-        columns = GridCells.Fixed(cols),
+        columns = GridCells.Adaptive(minSize = 160.dp),
         state = gridState, // <-- Assign the state here
         modifier = modifier
-            .fillMaxWidth()
             .padding(horizontal = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp) ,
